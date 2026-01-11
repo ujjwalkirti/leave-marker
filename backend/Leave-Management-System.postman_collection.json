@@ -1,0 +1,1394 @@
+{
+	"info": {
+		"_postman_id": "leave-management-system-001",
+		"name": "Leave Management System API",
+		"description": "Complete API collection for Leave & Attendance Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Signup (Create Company & Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"auth_token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"user_id\", jsonData.data.userId);",
+									"    pm.environment.set(\"company_id\", jsonData.data.companyId);",
+									"    console.log(\"Token saved:\", jsonData.data.accessToken);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"companyName\": \"{{company_name}}\",\n  \"companyEmail\": \"{{company_email}}\",\n  \"fullName\": \"{{admin_name}}\",\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\",\n  \"employeeId\": \"EMP001\",\n  \"workLocation\": \"MAHARASHTRA\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/signup",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "signup"]
+						},
+						"description": "Create a new company with super admin user"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"auth_token\", jsonData.data.accessToken);",
+									"    pm.environment.set(\"user_id\", jsonData.data.userId);",
+									"    pm.environment.set(\"company_id\", jsonData.data.companyId);",
+									"    console.log(\"Login successful. Token saved.\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{admin_email}}\",\n  \"password\": \"{{admin_password}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Login with email and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Request Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"{{admin_email}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/password-reset-request",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "password-reset-request"]
+						},
+						"description": "Request password reset link"
+					},
+					"response": []
+				},
+				{
+					"name": "Confirm Password Reset",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token\": \"your-reset-token\",\n  \"newPassword\": \"NewPassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/password-reset-confirm",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "password-reset-confirm"]
+						},
+						"description": "Reset password with token"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Employee Management",
+			"item": [
+				{
+					"name": "Create Employee",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"employee_id\", jsonData.data.id);",
+									"    console.log(\"Employee created with ID:\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"employeeId\": \"EMP002\",\n  \"fullName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"EMPLOYEE\",\n  \"department\": \"Engineering\",\n  \"jobTitle\": \"Software Engineer\",\n  \"dateOfJoining\": \"2024-01-15\",\n  \"employmentType\": \"FULL_TIME\",\n  \"workLocation\": \"KARNATAKA\",\n  \"managerId\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/employees",
+							"host": ["{{base_url}}"],
+							"path": ["employees"]
+						},
+						"description": "Create a new employee (HR_ADMIN, SUPER_ADMIN only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees",
+							"host": ["{{base_url}}"],
+							"path": ["employees"]
+						},
+						"description": "Get all employees in company"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Employees",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees/active",
+							"host": ["{{base_url}}"],
+							"path": ["employees", "active"]
+						},
+						"description": "Get only active employees"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Employee by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["employees", "{{employee_id}}"]
+						},
+						"description": "Get employee details by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Employee",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"John Doe Updated\",\n  \"department\": \"Product\",\n  \"jobTitle\": \"Senior Software Engineer\",\n  \"status\": \"ACTIVE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["employees", "{{employee_id}}"]
+						},
+						"description": "Update employee details (HR_ADMIN, SUPER_ADMIN only)"
+					},
+					"response": []
+				},
+				{
+					"name": "Deactivate Employee",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/employees/{{employee_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["employees", "{{employee_id}}"]
+						},
+						"description": "Deactivate employee (soft delete)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Leave Policies",
+			"item": [
+				{
+					"name": "Create Leave Policy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"leave_policy_id\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"leaveType\": \"CASUAL_LEAVE\",\n  \"annualQuota\": 12,\n  \"monthlyAccrual\": 1.0,\n  \"carryForward\": true,\n  \"maxCarryForward\": 5,\n  \"encashmentAllowed\": false,\n  \"halfDayAllowed\": true,\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-policies",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies"]
+						},
+						"description": "Create a leave policy"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Leave Policies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-policies",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies"]
+						},
+						"description": "Get all leave policies"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Leave Policies",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-policies/active",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies", "active"]
+						},
+						"description": "Get active leave policies"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leave Policy by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-policies/{{leave_policy_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies", "{{leave_policy_id}}"]
+						},
+						"description": "Get policy by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Leave Policy",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"annualQuota\": 15,\n  \"maxCarryForward\": 7,\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-policies/{{leave_policy_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies", "{{leave_policy_id}}"]
+						},
+						"description": "Update leave policy"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Leave Policy",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-policies/{{leave_policy_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["leave-policies", "{{leave_policy_id}}"]
+						},
+						"description": "Delete leave policy"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Holidays",
+			"item": [
+				{
+					"name": "Create Holiday",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"holiday_id\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Republic Day\",\n  \"date\": \"2024-01-26\",\n  \"type\": \"NATIONAL\",\n  \"state\": null,\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/holidays",
+							"host": ["{{base_url}}"],
+							"path": ["holidays"]
+						},
+						"description": "Create a holiday"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Holidays",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/holidays",
+							"host": ["{{base_url}}"],
+							"path": ["holidays"]
+						},
+						"description": "Get all holidays"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Holidays",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/holidays/active",
+							"host": ["{{base_url}}"],
+							"path": ["holidays", "active"]
+						},
+						"description": "Get active holidays"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Holidays by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/holidays/date-range?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["holidays", "date-range"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "Get holidays in date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Holiday",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Republic Day (Updated)\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/holidays/{{holiday_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["holidays", "{{holiday_id}}"]
+						},
+						"description": "Update holiday"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Holiday",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/holidays/{{holiday_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["holidays", "{{holiday_id}}"]
+						},
+						"description": "Delete holiday"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Leave Applications",
+			"item": [
+				{
+					"name": "Apply for Leave",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"leave_application_id\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"leaveType\": \"CASUAL_LEAVE\",\n  \"startDate\": \"2024-02-15\",\n  \"endDate\": \"2024-02-17\",\n  \"isHalfDay\": false,\n  \"reason\": \"Personal work\",\n  \"attachmentUrl\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-applications",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications"]
+						},
+						"description": "Apply for leave"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Leave Applications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/my-leaves",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "my-leaves"]
+						},
+						"description": "Get my leave applications"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leave Application by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}"]
+						},
+						"description": "Get leave application by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Manager Approvals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/pending-approvals/manager",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "pending-approvals", "manager"]
+						},
+						"description": "Get pending manager approvals (MANAGER role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending HR Approvals",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/pending-approvals/hr",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "pending-approvals", "hr"]
+						},
+						"description": "Get pending HR approvals (HR_ADMIN role)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Leaves by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/date-range?startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "date-range"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						},
+						"description": "Get leaves by date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Manager Approve Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"approved\": true,\n  \"reason\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}/approve/manager",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}", "approve", "manager"]
+						},
+						"description": "Manager approves leave"
+					},
+					"response": []
+				},
+				{
+					"name": "Manager Reject Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"approved\": false,\n  \"reason\": \"Insufficient coverage during this period\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}/approve/manager",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}", "approve", "manager"]
+						},
+						"description": "Manager rejects leave"
+					},
+					"response": []
+				},
+				{
+					"name": "HR Approve Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"approved\": true,\n  \"reason\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}/approve/hr",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}", "approve", "hr"]
+						},
+						"description": "HR approves leave"
+					},
+					"response": []
+				},
+				{
+					"name": "HR Reject Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"approved\": false,\n  \"reason\": \"Company-wide freeze on leaves this month\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}/approve/hr",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}", "approve", "hr"]
+						},
+						"description": "HR rejects leave"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Leave",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/leave-applications/{{leave_application_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["leave-applications", "{{leave_application_id}}", "cancel"]
+						},
+						"description": "Cancel leave application"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Attendance",
+			"item": [
+				{
+					"name": "Punch In",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"attendance_id\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"date\": \"{{current_date}}\",\n  \"punchTime\": \"09:00:00\",\n  \"isPunchIn\": true,\n  \"workType\": \"OFFICE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/punch",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "punch"]
+						},
+						"description": "Punch in for today"
+					},
+					"response": []
+				},
+				{
+					"name": "Punch Out",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"date\": \"{{current_date}}\",\n  \"punchTime\": \"18:00:00\",\n  \"isPunchIn\": false,\n  \"workType\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/punch",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "punch"]
+						},
+						"description": "Punch out for today"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Today's Attendance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/today",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "today"]
+						},
+						"description": "Get today's attendance"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Attendance",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/my-attendance",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "my-attendance"]
+						},
+						"description": "Get all my attendance records"
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Attendance by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/my-attendance/date-range?startDate=2024-01-01&endDate=2024-01-31",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "my-attendance", "date-range"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-01-31"
+								}
+							]
+						},
+						"description": "Get my attendance in date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Company Attendance by Date Range",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/date-range?startDate=2024-01-01&endDate=2024-01-31",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "date-range"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-01-31"
+								}
+							]
+						},
+						"description": "Get company attendance (Manager/HR)"
+					},
+					"response": []
+				},
+				{
+					"name": "Request Attendance Correction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"punchInTime\": \"09:15:00\",\n  \"punchOutTime\": \"18:30:00\",\n  \"workType\": \"OFFICE\",\n  \"remarks\": \"Forgot to punch in on time\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/{{attendance_id}}/request-correction",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "{{attendance_id}}", "request-correction"]
+						},
+						"description": "Request attendance correction"
+					},
+					"response": []
+				},
+				{
+					"name": "Approve Attendance Correction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"punchInTime\": \"09:15:00\",\n  \"punchOutTime\": \"18:30:00\",\n  \"workType\": \"OFFICE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/{{attendance_id}}/approve-correction",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "{{attendance_id}}", "approve-correction"]
+						},
+						"description": "Approve correction (Manager/HR)"
+					},
+					"response": []
+				},
+				{
+					"name": "Reject Attendance Correction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reason\": \"Inconsistent with system logs\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/{{attendance_id}}/reject-correction",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "{{attendance_id}}", "reject-correction"]
+						},
+						"description": "Reject correction (Manager/HR)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Pending Corrections",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/attendance/pending-corrections",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "pending-corrections"]
+						},
+						"description": "Get pending corrections (Manager/HR)"
+					},
+					"response": []
+				},
+				{
+					"name": "Mark Attendance Manually",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"employeeId\": {{employee_id}},\n  \"date\": \"2024-01-15\",\n  \"status\": \"LEAVE\",\n  \"remarks\": \"On approved leave\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/attendance/mark",
+							"host": ["{{base_url}}"],
+							"path": ["attendance", "mark"]
+						},
+						"description": "Manual attendance marking (HR only)"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Leave Balance Report (Excel)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/leave-balance?year=2024&format=excel",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "leave-balance"],
+							"query": [
+								{
+									"key": "year",
+									"value": "2024"
+								},
+								{
+									"key": "format",
+									"value": "excel"
+								}
+							]
+						},
+						"description": "Download leave balance report as Excel"
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Balance Report (CSV)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/leave-balance?year=2024&format=csv",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "leave-balance"],
+							"query": [
+								{
+									"key": "year",
+									"value": "2024"
+								},
+								{
+									"key": "format",
+									"value": "csv"
+								}
+							]
+						},
+						"description": "Download leave balance report as CSV"
+					},
+					"response": []
+				},
+				{
+					"name": "Attendance Report (Excel)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/attendance?startDate=2024-01-01&endDate=2024-01-31&format=excel",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "attendance"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "format",
+									"value": "excel"
+								}
+							]
+						},
+						"description": "Download attendance report as Excel"
+					},
+					"response": []
+				},
+				{
+					"name": "Attendance Report (CSV)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/attendance?startDate=2024-01-01&endDate=2024-01-31&format=csv",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "attendance"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-01-31"
+								},
+								{
+									"key": "format",
+									"value": "csv"
+								}
+							]
+						},
+						"description": "Download attendance report as CSV"
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Usage Report (Excel)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/leave-usage?startDate=2024-01-01&endDate=2024-12-31&format=excel",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "leave-usage"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "format",
+									"value": "excel"
+								}
+							]
+						},
+						"description": "Download leave usage report as Excel"
+					},
+					"response": []
+				},
+				{
+					"name": "Leave Usage Report (CSV)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/reports/leave-usage?startDate=2024-01-01&endDate=2024-12-31&format=csv",
+							"host": ["{{base_url}}"],
+							"path": ["reports", "leave-usage"],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								},
+								{
+									"key": "format",
+									"value": "csv"
+								}
+							]
+						},
+						"description": "Download leave usage report as CSV"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						},
+						"description": "Check if API is running"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080/api",
+			"type": "string"
+		}
+	]
+}

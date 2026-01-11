@@ -1,0 +1,93 @@
+# =========================
+# Next.js
+# =========================
+
+# dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+build/
+
+# production build
+dist/
+
+# environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# coverage
+coverage/
+
+# cache
+.cache/
+.eslintcache
+.next/cache/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# misc
+*.tsbuildinfo
+
+
+# =========================
+# Java / Spring Boot
+# =========================
+
+# Compiled class files
+*.class
+
+# Build output
+target/
+out/
+
+# Logs
+*.log
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Environment files
+application.properties
+application.yml
+application-*.yml
+
+# IDEs
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test reports
+surefire-reports/
+failsafe-reports/
+
+# JVM crash logs
+hs_err_pid*
+
+
+
+.claude
