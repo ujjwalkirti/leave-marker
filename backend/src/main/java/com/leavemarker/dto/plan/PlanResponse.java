@@ -24,11 +24,17 @@ public class PlanResponse {
     private Integer minEmployees;
     private Integer maxEmployees;
     private Integer maxLeavePolicies;
+    private Integer maxHolidays;
     private Boolean active;
-    private Boolean attendanceTracking;
-    private Boolean advancedReports;
-    private Boolean customLeaveTypes;
-    private Boolean apiAccess;
-    private Boolean prioritySupport;
+
+    // Feature flags
+    private Boolean attendanceManagement;
+    private Boolean reportsDownload;
+    private Boolean multipleLeavePolicies;
+    private Boolean unlimitedHolidays;
     private Boolean attendanceRateAnalytics;
+
+    // Report download pricing (add-on for MID_TIER)
+    private BigDecimal reportDownloadPriceUnder50;
+    private BigDecimal reportDownloadPrice50Plus;
 }

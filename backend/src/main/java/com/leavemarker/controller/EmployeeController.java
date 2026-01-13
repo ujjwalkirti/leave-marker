@@ -6,6 +6,7 @@ import com.leavemarker.dto.employee.EmployeeResponse;
 import com.leavemarker.dto.employee.EmployeeUpdateRequest;
 import com.leavemarker.security.UserPrincipal;
 import com.leavemarker.service.EmployeeService;
+import com.leavemarker.service.PlanValidationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,12 +23,16 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final PlanValidationService planValidationService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'HR_ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeResponse>> createEmployee(
             @Valid @RequestBody EmployeeRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate employee limit based on plan
+        planValidationService.validateEmployeeLimit(currentUser.getCompanyId());
+
         EmployeeResponse response = employeeService.createEmployee(request, currentUser);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -54,6 +59,14 @@ public class EmployeeController {
             @AuthenticationPrincipal UserPrincipal currentUser) {
         List<EmployeeResponse> response = employeeService.getActiveEmployees(currentUser);
         return ResponseEntity.ok(ApiResponse.success("Active employees retrieved successfully", response));
+    }
+
+    @GetMapping("/active/count")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Long>> getActiveEmployeesCount(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        long count = employeeService.getActiveEmployees(currentUser).size();
+        return ResponseEntity.ok(ApiResponse.success("Active employees count retrieved successfully", count));
     }
 
     @PutMapping("/{id}")

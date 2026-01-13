@@ -5,6 +5,7 @@ import com.leavemarker.dto.holiday.HolidayRequest;
 import com.leavemarker.dto.holiday.HolidayResponse;
 import com.leavemarker.security.UserPrincipal;
 import com.leavemarker.service.HolidayService;
+import com.leavemarker.service.PlanValidationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -23,12 +24,16 @@ import java.util.List;
 public class HolidayController {
 
     private final HolidayService holidayService;
+    private final PlanValidationService planValidationService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'HR_ADMIN')")
     public ResponseEntity<ApiResponse<HolidayResponse>> createHoliday(
             @Valid @RequestBody HolidayRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate holiday limit based on plan
+        planValidationService.validateHolidayLimit(currentUser.getCompanyId());
+
         HolidayResponse response = holidayService.createHoliday(request, currentUser);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

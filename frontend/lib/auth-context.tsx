@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authAPI } from './api';
+import { authAPI, setLoggingOut } from './api';
 
 interface User {
   id: number;
@@ -31,6 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
+    // Clear the logout flag if it exists (from a previous logout)
+    setLoggingOut(false);
+
     if (USE_COOKIES) {
       // Cookie-based auth: verify session with backend
       verifySession();
@@ -128,25 +131,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    try {
-      if (USE_COOKIES) {
-        // Call backend to clear the httpOnly cookie
-        await authAPI.logout();
-      } else {
-        // Temporary fallback: clear localStorage
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-      }
-    } catch (error) {
-      // Continue with logout even if API call fails
-      if (!USE_COOKIES) {
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user');
-      }
-    } finally {
-      setUser(null);
-      router.push('/login');
+    // Set flag to prevent interceptor from redirecting (persists across page load)
+    setLoggingOut(true);
+
+    // Clear user state first
+    setUser(null);
+
+    // Clear localStorage if not using cookies
+    if (!USE_COOKIES) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
     }
+
+    // Call backend to clear the httpOnly cookie
+    if (USE_COOKIES) {
+      try {
+        await authAPI.logout();
+      } catch (error) {
+        // Ignore errors during logout
+        console.log('Logout API call failed, but continuing with logout');
+      }
+    }
+
+    // Redirect (flag will be cleared when landing page loads)
+    window.location.href = '/';
   };
 
   return (

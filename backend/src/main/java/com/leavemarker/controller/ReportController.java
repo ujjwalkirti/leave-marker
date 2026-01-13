@@ -2,6 +2,7 @@ package com.leavemarker.controller;
 
 import com.leavemarker.security.UserPrincipal;
 import com.leavemarker.service.ReportService;
+import com.leavemarker.service.PlanValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -21,12 +22,15 @@ import java.time.LocalDate;
 public class ReportController {
 
     private final ReportService reportService;
+    private final PlanValidationService planValidationService;
 
     @GetMapping("/leave-balance")
     public ResponseEntity<byte[]> generateLeaveBalanceReport(
             @RequestParam Integer year,
             @RequestParam(defaultValue = "excel") String format,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate reports download access
+        planValidationService.validateReportsDownloadAccess(currentUser.getCompanyId());
 
         byte[] report = reportService.generateLeaveBalanceReport(year, currentUser, format);
 
@@ -44,6 +48,8 @@ public class ReportController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "excel") String format,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate reports download access
+        planValidationService.validateReportsDownloadAccess(currentUser.getCompanyId());
 
         byte[] report = reportService.generateAttendanceReport(startDate, endDate, currentUser, format);
 
@@ -61,6 +67,8 @@ public class ReportController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "excel") String format,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate reports download access
+        planValidationService.validateReportsDownloadAccess(currentUser.getCompanyId());
 
         byte[] report = reportService.generateLeaveUsageReport(startDate, endDate, currentUser, format);
 

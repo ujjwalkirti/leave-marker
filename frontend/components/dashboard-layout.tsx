@@ -20,7 +20,6 @@ import {
   FileText,
   Calendar,
   ClipboardList,
-  Clock,
   BarChart3,
   LogOut,
   Menu,
@@ -64,11 +63,6 @@ const navigation: NavItem[] = [
     icon: ClipboardList,
   },
   {
-    name: 'Attendance',
-    href: '/dashboard/attendance',
-    icon: Clock,
-  },
-  {
     name: 'Reports',
     href: '/dashboard/reports',
     icon: BarChart3,
@@ -84,7 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push('/');
   };
 
   const getInitials = (name: string) => {
@@ -192,7 +186,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Menu className="h-6 w-6" />
             </button>
 
-            <div className="flex-1 lg:hidden" />
+            <div className="flex-1" />
 
             <div className="flex items-center gap-4">
               <DropdownMenu>

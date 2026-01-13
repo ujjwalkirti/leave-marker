@@ -8,32 +8,34 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { planAPI, subscriptionAPI, paymentAPI } from '@/lib/api';
 import { toast } from 'sonner';
-import { Check, X, Loader2, ArrowLeft, Sparkles, Building2, Crown } from 'lucide-react';
+import { Check, X, Loader2, ArrowLeft, Sparkles, Building2, Zap, Users, FileText, Calendar, ClipboardCheck, BarChart3, Download, Layers, Infinity } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 interface Plan {
   id: number;
   name: string;
   description: string;
-  tier: 'FREE' | 'PRO' | 'ENTERPRISE';
+  tier: 'FREE' | 'MID_TIER';
   billingCycle: 'MONTHLY' | 'YEARLY';
   monthlyPrice: number;
   yearlyPrice: number;
   minEmployees: number;
   maxEmployees: number;
   maxLeavePolicies: number;
+  maxHolidays: number;
   active: boolean;
-  attendanceTracking: boolean;
-  advancedReports: boolean;
-  customLeaveTypes: boolean;
-  apiAccess: boolean;
-  prioritySupport: boolean;
+  attendanceManagement: boolean;
+  reportsDownload: boolean;
+  multipleLeavePolicies: boolean;
+  unlimitedHolidays: boolean;
   attendanceRateAnalytics: boolean;
+  reportDownloadPriceUnder50: number;
+  reportDownloadPrice50Plus: number;
 }
 
 interface SubscriptionFeatures {
   hasActiveSubscription: boolean;
-  tier: 'FREE' | 'PRO' | 'ENTERPRISE';
+  tier: 'FREE' | 'MID_TIER';
   currentEmployees: number;
   remainingEmployeeSlots: number;
 }
@@ -59,8 +61,10 @@ export default function PricingPage() {
     try {
       setLoading(true);
       const response = await planAPI.getActivePlans();
+      console.log('Plans API response:', response.data);
       if (response.data.success) {
         setPlans(response.data.data);
+        console.log('Plans loaded:', response.data.data);
       }
     } catch (error: any) {
       console.error('Error fetching plans:', error);
@@ -160,10 +164,8 @@ export default function PricingPage() {
     switch (tier) {
       case 'FREE':
         return <Sparkles className="h-6 w-6 text-gray-500" />;
-      case 'PRO':
+      case 'MID_TIER':
         return <Building2 className="h-6 w-6 text-indigo-600" />;
-      case 'ENTERPRISE':
-        return <Crown className="h-6 w-6 text-amber-500" />;
       default:
         return null;
     }
@@ -173,10 +175,8 @@ export default function PricingPage() {
     switch (tier) {
       case 'FREE':
         return 'border-gray-200';
-      case 'PRO':
+      case 'MID_TIER':
         return 'border-indigo-600 border-2 shadow-xl';
-      case 'ENTERPRISE':
-        return 'border-amber-500 border-2 shadow-xl';
       default:
         return 'border-gray-200';
     }
@@ -190,10 +190,58 @@ export default function PricingPage() {
     return acc;
   }, {} as Record<string, Plan>);
 
-  const tierOrder: ('FREE' | 'PRO' | 'ENTERPRISE')[] = ['FREE', 'PRO', 'ENTERPRISE'];
-  const orderedPlans = tierOrder
+  const tierOrder: ('FREE' | 'MID_TIER')[] = ['FREE', 'MID_TIER'];
+  let orderedPlans = tierOrder
     .map(tier => plansByTier[tier])
     .filter(Boolean);
+
+  // Fallback to hardcoded plans if no plans exist in database
+  if (orderedPlans.length === 0) {
+    orderedPlans = [
+      {
+        id: 1,
+        name: 'Free Plan',
+        description: 'Perfect for small teams just getting started',
+        tier: 'FREE' as const,
+        billingCycle: 'MONTHLY' as const,
+        monthlyPrice: 0,
+        yearlyPrice: 0,
+        minEmployees: 1,
+        maxEmployees: 10,
+        maxLeavePolicies: 1,
+        maxHolidays: 6,
+        active: true,
+        attendanceManagement: false,
+        reportsDownload: false,
+        multipleLeavePolicies: false,
+        unlimitedHolidays: false,
+        attendanceRateAnalytics: false,
+        reportDownloadPriceUnder50: 0,
+        reportDownloadPrice50Plus: 0,
+      },
+      {
+        id: 2,
+        name: 'Mid-Tier Plan',
+        description: 'Comprehensive HR management for growing companies',
+        tier: 'MID_TIER' as const,
+        billingCycle: 'MONTHLY' as const,
+        monthlyPrice: 100,
+        yearlyPrice: 1000,
+        minEmployees: 1,
+        maxEmployees: 999999,
+        maxLeavePolicies: 999,
+        maxHolidays: -1,
+        active: true,
+        attendanceManagement: true,
+        reportsDownload: true,
+        multipleLeavePolicies: true,
+        unlimitedHolidays: true,
+        attendanceRateAnalytics: true,
+        reportDownloadPriceUnder50: 200,
+        reportDownloadPrice50Plus: 400,
+      },
+    ];
+  }
 
   if (loading) {
     return (
@@ -204,20 +252,23 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 relative">
+      {/* Back Button */}
+      {user && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push('/dashboard')}
+          className="absolute top-4 left-4 z-10"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+      )}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
         {/* Header */}
         <div className="text-center mb-12">
-          {user && (
-            <Button
-              variant="ghost"
-              onClick={() => router.push('/dashboard')}
-              className="mb-6"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Dashboard
-            </Button>
-          )}
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Simple, Transparent Pricing
           </h1>
@@ -241,28 +292,8 @@ export default function PricingPage() {
           </span>
         </div>
 
-        {/* Current Plan Info */}
-        {currentFeatures && (
-          <div className="max-w-md mx-auto mb-8">
-            <Card className="bg-indigo-50 border-indigo-200">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-sm text-indigo-600 font-medium">Your Current Plan</p>
-                  <p className="text-2xl font-bold text-indigo-900">{currentFeatures.tier}</p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {currentFeatures.currentEmployees} employees
-                    {currentFeatures.remainingEmployeeSlots > 0 && (
-                      <span> ({currentFeatures.remainingEmployeeSlots} slots remaining)</span>
-                    )}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {orderedPlans.map((plan) => {
             const isCurrentPlan = currentFeatures?.tier === plan.tier;
             const savings = getSavingsPercentage(plan);
@@ -274,7 +305,7 @@ export default function PricingPage() {
                   isCurrentPlan ? 'ring-2 ring-indigo-500' : ''
                 }`}
               >
-                {plan.tier === 'PRO' && (
+                {plan.tier === 'MID_TIER' && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <span className="bg-indigo-600 text-white px-4 py-1 rounded-full text-sm font-medium">
                       Most Popular
@@ -307,14 +338,16 @@ export default function PricingPage() {
                         <span className="text-4xl font-bold">
                           ₹{getPrice(plan).toLocaleString('en-IN')}
                         </span>
-                        <span className="text-gray-500">/{isYearly ? 'year' : 'month'}</span>
+                        <span className="text-gray-500">
+                          /employee/{isYearly ? 'year' : 'month'}
+                        </span>
                         {isYearly && savings > 0 && (
                           <p className="text-sm text-green-600 font-medium mt-1">
                             Save {savings}% with yearly billing
                           </p>
                         )}
                         <p className="text-sm text-gray-500 mt-1">
-                          {plan.minEmployees}-{plan.maxEmployees === 999 ? 'unlimited' : plan.maxEmployees} employees
+                          Unlimited employees
                         </p>
                       </div>
                     )}
@@ -322,42 +355,58 @@ export default function PricingPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-3">
+                    {/* Employee Limits */}
                     <Feature
                       included={true}
-                      text={`Up to ${plan.maxEmployees === 999 ? 'unlimited' : plan.maxEmployees} employees`}
+                      text={plan.tier === 'FREE' ? `Up to ${plan.maxEmployees} employees` : 'Unlimited employees'}
                     />
+
+                    {/* Leave Policies */}
                     <Feature
                       included={true}
-                      text={`${plan.maxLeavePolicies} leave ${plan.maxLeavePolicies === 1 ? 'policy' : 'policies'}`}
+                      text={plan.multipleLeavePolicies ? 'Multiple leave policies' : '1 leave policy'}
                     />
-                    <Feature included={true} text="Leave management" />
-                    <Feature included={true} text="Holiday management" />
+
+                    {/* Holidays */}
                     <Feature
-                      included={plan.attendanceTracking}
-                      text="Attendance tracking"
+                      included={true}
+                      text={plan.unlimitedHolidays ? 'Unlimited holidays' : `Up to ${plan.maxHolidays} holidays/year`}
+                    />
+
+                    {/* Core Features */}
+                    <Feature included={true} text="Leave management system" />
+                    <Feature included={true} text="Holiday calendar" />
+                    <Feature included={true} text="Employee self-service portal" />
+
+                    {/* Advanced Features */}
+                    <Feature
+                      included={plan.attendanceManagement}
+                      text="Attendance management"
                     />
                     <Feature
                       included={plan.attendanceRateAnalytics}
                       text="Attendance rate analytics"
                     />
                     <Feature
-                      included={plan.advancedReports}
-                      text="Advanced reports & analytics"
-                    />
-                    <Feature
-                      included={plan.customLeaveTypes}
-                      text="Custom leave types"
-                    />
-                    <Feature included={plan.apiAccess} text="API access" />
-                    <Feature
-                      included={plan.prioritySupport}
-                      text="Priority support"
+                      included={plan.reportsDownload}
+                      text="Reports download"
                     />
                   </div>
 
+                  {/* Add-on pricing for MID_TIER */}
+                  {plan.tier === 'MID_TIER' && plan.reportDownloadPriceUnder50 > 0 && (
+                    <div className="pt-4 border-t">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Optional Add-on:</p>
+                      <div className="text-sm text-gray-600 space-y-1">
+                        <p>• Report Download: ₹{plan.reportDownloadPriceUnder50}/month (&lt;50 employees)</p>
+                        <p>• Report Download: ₹{plan.reportDownloadPrice50Plus}/month (≥50 employees)</p>
+                      </div>
+                    </div>
+                  )}
+
                   <Button
                     className="w-full"
-                    variant={plan.tier === 'PRO' ? 'default' : 'outline'}
+                    variant={plan.tier === 'MID_TIER' ? 'default' : 'outline'}
                     size="lg"
                     onClick={() => handleSubscribe(plan)}
                     disabled={subscribing || isCurrentPlan}
@@ -395,7 +444,31 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  The free plan is perfect for small teams of up to 10 employees. You get full access to leave and holiday management with basic features. No credit card required!
+                  The free plan is perfect for small teams of up to 10 employees. You get full access to leave and holiday management with 1 leave policy and up to 6 holidays per year. No credit card required!
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  How is the Mid-Tier plan priced?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  The Mid-Tier plan is priced at ₹100 per employee per month (or ₹1,000 per employee per year). You only pay for the number of active employees in your organization, giving you complete flexibility as your team grows.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  What&apos;s included with the Report Download add-on?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  The Report Download add-on allows you to export comprehensive reports. Pricing is ₹200/month for companies with less than 50 employees and ₹400/month for companies with 50 or more employees. This is optional and can be added to any Mid-Tier subscription.
                 </p>
               </CardContent>
             </Card>
@@ -407,7 +480,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  Yes! You can upgrade your plan at any time to access more features and employee slots. For downgrades, changes will be reflected at the end of your current billing period.
+                  Yes! You can upgrade from Free to Mid-Tier at any time. Your billing will be prorated based on the remaining days in your billing cycle. Changes take effect immediately.
                 </p>
               </CardContent>
             </Card>
@@ -431,7 +504,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600">
-                  No! Both monthly and yearly plans can be cancelled anytime with no penalties. Yearly plans offer better value with up to 20% savings.
+                  No! Both monthly and yearly plans can be cancelled anytime with no penalties. Yearly plans offer better value with significant savings compared to monthly billing.
                 </p>
               </CardContent>
             </Card>

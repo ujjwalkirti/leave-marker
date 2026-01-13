@@ -13,6 +13,7 @@ import java.util.Optional;
 @Repository
 public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
     Optional<Subscription> findByCompanyAndStatus(Company company, SubscriptionStatus status);
+    Optional<Subscription> findByCompanyIdAndStatus(Long companyId, SubscriptionStatus status);
     List<Subscription> findByCompany(Company company);
     List<Subscription> findByEndDateBeforeAndStatus(LocalDateTime endDate, SubscriptionStatus status);
     Optional<Subscription> findFirstByCompanyOrderByEndDateDesc(Company company);

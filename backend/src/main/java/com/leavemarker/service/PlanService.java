@@ -63,14 +63,16 @@ public class PlanService {
                 .yearlyPrice(request.getYearlyPrice())
                 .minEmployees(request.getMinEmployees() != null ? request.getMinEmployees() : 1)
                 .maxEmployees(request.getMaxEmployees() != null ? request.getMaxEmployees() : 10)
-                .maxLeavePolicies(request.getMaxLeavePolicies() != null ? request.getMaxLeavePolicies() : 3)
+                .maxLeavePolicies(request.getMaxLeavePolicies() != null ? request.getMaxLeavePolicies() : 1)
+                .maxHolidays(request.getMaxHolidays() != null ? request.getMaxHolidays() : 6)
                 .active(request.getActive() != null ? request.getActive() : true)
-                .attendanceTracking(request.getAttendanceTracking() != null ? request.getAttendanceTracking() : false)
-                .advancedReports(request.getAdvancedReports() != null ? request.getAdvancedReports() : false)
-                .customLeaveTypes(request.getCustomLeaveTypes() != null ? request.getCustomLeaveTypes() : false)
-                .apiAccess(request.getApiAccess() != null ? request.getApiAccess() : false)
-                .prioritySupport(request.getPrioritySupport() != null ? request.getPrioritySupport() : false)
+                .attendanceManagement(request.getAttendanceManagement() != null ? request.getAttendanceManagement() : false)
+                .reportsDownload(request.getReportsDownload() != null ? request.getReportsDownload() : false)
+                .multipleLeavePolicies(request.getMultipleLeavePolicies() != null ? request.getMultipleLeavePolicies() : false)
+                .unlimitedHolidays(request.getUnlimitedHolidays() != null ? request.getUnlimitedHolidays() : false)
                 .attendanceRateAnalytics(request.getAttendanceRateAnalytics() != null ? request.getAttendanceRateAnalytics() : false)
+                .reportDownloadPriceUnder50(request.getReportDownloadPriceUnder50() != null ? request.getReportDownloadPriceUnder50() : java.math.BigDecimal.ZERO)
+                .reportDownloadPrice50Plus(request.getReportDownloadPrice50Plus() != null ? request.getReportDownloadPrice50Plus() : java.math.BigDecimal.ZERO)
                 .build();
 
         Plan savedPlan = planRepository.save(plan);
@@ -91,14 +93,16 @@ public class PlanService {
         plan.setYearlyPrice(request.getYearlyPrice());
         plan.setMinEmployees(request.getMinEmployees() != null ? request.getMinEmployees() : 1);
         plan.setMaxEmployees(request.getMaxEmployees() != null ? request.getMaxEmployees() : 10);
-        plan.setMaxLeavePolicies(request.getMaxLeavePolicies() != null ? request.getMaxLeavePolicies() : 3);
+        plan.setMaxLeavePolicies(request.getMaxLeavePolicies() != null ? request.getMaxLeavePolicies() : 1);
+        plan.setMaxHolidays(request.getMaxHolidays() != null ? request.getMaxHolidays() : 6);
         plan.setActive(request.getActive() != null ? request.getActive() : true);
-        plan.setAttendanceTracking(request.getAttendanceTracking() != null ? request.getAttendanceTracking() : false);
-        plan.setAdvancedReports(request.getAdvancedReports() != null ? request.getAdvancedReports() : false);
-        plan.setCustomLeaveTypes(request.getCustomLeaveTypes() != null ? request.getCustomLeaveTypes() : false);
-        plan.setApiAccess(request.getApiAccess() != null ? request.getApiAccess() : false);
-        plan.setPrioritySupport(request.getPrioritySupport() != null ? request.getPrioritySupport() : false);
+        plan.setAttendanceManagement(request.getAttendanceManagement() != null ? request.getAttendanceManagement() : false);
+        plan.setReportsDownload(request.getReportsDownload() != null ? request.getReportsDownload() : false);
+        plan.setMultipleLeavePolicies(request.getMultipleLeavePolicies() != null ? request.getMultipleLeavePolicies() : false);
+        plan.setUnlimitedHolidays(request.getUnlimitedHolidays() != null ? request.getUnlimitedHolidays() : false);
         plan.setAttendanceRateAnalytics(request.getAttendanceRateAnalytics() != null ? request.getAttendanceRateAnalytics() : false);
+        plan.setReportDownloadPriceUnder50(request.getReportDownloadPriceUnder50() != null ? request.getReportDownloadPriceUnder50() : java.math.BigDecimal.ZERO);
+        plan.setReportDownloadPrice50Plus(request.getReportDownloadPrice50Plus() != null ? request.getReportDownloadPrice50Plus() : java.math.BigDecimal.ZERO);
 
         Plan updatedPlan = planRepository.save(plan);
         log.info("Updated plan: {}", id);
@@ -126,13 +130,15 @@ public class PlanService {
                 .minEmployees(plan.getMinEmployees())
                 .maxEmployees(plan.getMaxEmployees())
                 .maxLeavePolicies(plan.getMaxLeavePolicies())
+                .maxHolidays(plan.getMaxHolidays())
                 .active(plan.getActive())
-                .attendanceTracking(plan.getAttendanceTracking())
-                .advancedReports(plan.getAdvancedReports())
-                .customLeaveTypes(plan.getCustomLeaveTypes())
-                .apiAccess(plan.getApiAccess())
-                .prioritySupport(plan.getPrioritySupport())
+                .attendanceManagement(plan.getAttendanceManagement())
+                .reportsDownload(plan.getReportsDownload())
+                .multipleLeavePolicies(plan.getMultipleLeavePolicies())
+                .unlimitedHolidays(plan.getUnlimitedHolidays())
                 .attendanceRateAnalytics(plan.getAttendanceRateAnalytics())
+                .reportDownloadPriceUnder50(plan.getReportDownloadPriceUnder50())
+                .reportDownloadPrice50Plus(plan.getReportDownloadPrice50Plus())
                 .build();
     }
 }

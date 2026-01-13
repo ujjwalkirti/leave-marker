@@ -47,13 +47,13 @@ public class SubscriptionFeatureService {
                     .hasActiveSubscription(false)
                     .tier(PlanTier.FREE)
                     .maxEmployees(10)
-                    .maxLeavePolicies(3)
-                    .attendanceTracking(false)
-                    .advancedReports(false)
+                    .maxLeavePolicies(1)
+                    .maxHolidays(6)
+                    .attendanceManagement(false)
+                    .reportsDownload(false)
+                    .multipleLeavePolicies(false)
+                    .unlimitedHolidays(false)
                     .attendanceRateAnalytics(false)
-                    .customLeaveTypes(false)
-                    .apiAccess(false)
-                    .prioritySupport(false)
                     .build();
         }
 
@@ -72,12 +72,12 @@ public class SubscriptionFeatureService {
                 .planName(plan.getName())
                 .maxEmployees(plan.getMaxEmployees())
                 .maxLeavePolicies(plan.getMaxLeavePolicies())
-                .attendanceTracking(plan.getAttendanceTracking())
-                .advancedReports(plan.getAdvancedReports())
+                .maxHolidays(plan.getMaxHolidays())
+                .attendanceManagement(plan.getAttendanceManagement())
+                .reportsDownload(plan.getReportsDownload())
+                .multipleLeavePolicies(plan.getMultipleLeavePolicies())
+                .unlimitedHolidays(plan.getUnlimitedHolidays())
                 .attendanceRateAnalytics(plan.getAttendanceRateAnalytics())
-                .customLeaveTypes(plan.getCustomLeaveTypes())
-                .apiAccess(plan.getApiAccess())
-                .prioritySupport(plan.getPrioritySupport())
                 .currentPeriodEnd(subscription.getCurrentPeriodEnd())
                 .build();
     }
@@ -115,28 +115,28 @@ public class SubscriptionFeatureService {
     }
 
     /**
-     * Check if company has access to attendance tracking.
+     * Check if company has access to attendance management.
      */
     @Transactional(readOnly = true)
     public void validateAttendanceAccess(Long companyId) {
         SubscriptionInfo info = getSubscriptionInfo(companyId);
 
-        if (!info.isAttendanceTracking()) {
+        if (!info.isAttendanceManagement()) {
             throw new BadRequestException(
-                    "Attendance tracking is not available on the FREE plan. Please upgrade to access this feature.");
+                    "Attendance management is not available on the FREE plan. Please upgrade to access this feature.");
         }
     }
 
     /**
-     * Check if company has access to advanced reports.
+     * Check if company has access to reports download.
      */
     @Transactional(readOnly = true)
     public void validateReportsAccess(Long companyId) {
         SubscriptionInfo info = getSubscriptionInfo(companyId);
 
-        if (!info.isAdvancedReports()) {
+        if (!info.isReportsDownload()) {
             throw new BadRequestException(
-                    "Advanced reports are not available on the FREE plan. Please upgrade to access this feature.");
+                    "Reports download is not available on the FREE plan. Please upgrade to access this feature.");
         }
     }
 
@@ -190,12 +190,12 @@ public class SubscriptionFeatureService {
                 .maxLeavePolicies(info.getMaxLeavePolicies())
                 .currentLeavePolicies(currentPolicies)
                 .remainingLeavePolicySlots(Math.max(0, info.getMaxLeavePolicies() - currentPolicies))
-                .attendanceTracking(info.isAttendanceTracking())
-                .advancedReports(info.isAdvancedReports())
+                .maxHolidays(info.getMaxHolidays())
+                .attendanceManagement(info.isAttendanceManagement())
+                .reportsDownload(info.isReportsDownload())
+                .multipleLeavePolicies(info.isMultipleLeavePolicies())
+                .unlimitedHolidays(info.isUnlimitedHolidays())
                 .attendanceRateAnalytics(info.isAttendanceRateAnalytics())
-                .customLeaveTypes(info.isCustomLeaveTypes())
-                .apiAccess(info.isApiAccess())
-                .prioritySupport(info.isPrioritySupport())
                 .currentPeriodEnd(info.getCurrentPeriodEnd())
                 .build();
     }
@@ -211,12 +211,12 @@ public class SubscriptionFeatureService {
         private String planName;
         private int maxEmployees;
         private int maxLeavePolicies;
-        private boolean attendanceTracking;
-        private boolean advancedReports;
+        private int maxHolidays;
+        private boolean attendanceManagement;
+        private boolean reportsDownload;
+        private boolean multipleLeavePolicies;
+        private boolean unlimitedHolidays;
         private boolean attendanceRateAnalytics;
-        private boolean customLeaveTypes;
-        private boolean apiAccess;
-        private boolean prioritySupport;
         private LocalDateTime currentPeriodEnd;
     }
 }

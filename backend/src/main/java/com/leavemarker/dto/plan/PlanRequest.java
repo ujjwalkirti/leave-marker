@@ -45,11 +45,22 @@ public class PlanRequest {
     @PositiveOrZero(message = "Max leave policies must be zero or positive")
     private Integer maxLeavePolicies;
 
+    @PositiveOrZero(message = "Max holidays must be zero or positive")
+    private Integer maxHolidays;
+
     private Boolean active;
-    private Boolean attendanceTracking;
-    private Boolean advancedReports;
-    private Boolean customLeaveTypes;
-    private Boolean apiAccess;
-    private Boolean prioritySupport;
+
+    // Feature flags
+    private Boolean attendanceManagement;
+    private Boolean reportsDownload;
+    private Boolean multipleLeavePolicies;
+    private Boolean unlimitedHolidays;
     private Boolean attendanceRateAnalytics;
+
+    // Report download pricing (add-on for MID_TIER)
+    @PositiveOrZero(message = "Report download price must be zero or positive")
+    private BigDecimal reportDownloadPriceUnder50;
+
+    @PositiveOrZero(message = "Report download price must be zero or positive")
+    private BigDecimal reportDownloadPrice50Plus;
 }

@@ -58,6 +58,15 @@ public class Subscription extends BaseEntity {
     @Builder.Default
     private Boolean isPaid = false;
 
+    // Add-on flags
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean hasReportDownloadAddon = false;
+
+    @Column(precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal reportDownloadAddonPrice = BigDecimal.ZERO;
+
     @Column(length = 500)
     private String cancellationReason;
 

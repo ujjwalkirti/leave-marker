@@ -29,12 +29,12 @@ public class SubscriptionFeatureResponse {
     private int remainingLeavePolicySlots;
 
     // Feature flags
-    private boolean attendanceTracking;
-    private boolean advancedReports;
+    private int maxHolidays;
+    private boolean attendanceManagement;
+    private boolean reportsDownload;
+    private boolean multipleLeavePolicies;
+    private boolean unlimitedHolidays;
     private boolean attendanceRateAnalytics;
-    private boolean customLeaveTypes;
-    private boolean apiAccess;
-    private boolean prioritySupport;
 
     // Period info
     private LocalDateTime currentPeriodEnd;

@@ -219,13 +219,15 @@ public class SubscriptionService {
                 .minEmployees(plan.getMinEmployees())
                 .maxEmployees(plan.getMaxEmployees())
                 .maxLeavePolicies(plan.getMaxLeavePolicies())
+                .maxHolidays(plan.getMaxHolidays())
                 .active(plan.getActive())
-                .attendanceTracking(plan.getAttendanceTracking())
-                .advancedReports(plan.getAdvancedReports())
-                .customLeaveTypes(plan.getCustomLeaveTypes())
-                .apiAccess(plan.getApiAccess())
-                .prioritySupport(plan.getPrioritySupport())
+                .attendanceManagement(plan.getAttendanceManagement())
+                .reportsDownload(plan.getReportsDownload())
+                .multipleLeavePolicies(plan.getMultipleLeavePolicies())
+                .unlimitedHolidays(plan.getUnlimitedHolidays())
                 .attendanceRateAnalytics(plan.getAttendanceRateAnalytics())
+                .reportDownloadPriceUnder50(plan.getReportDownloadPriceUnder50())
+                .reportDownloadPrice50Plus(plan.getReportDownloadPrice50Plus())
                 .build();
     }
 }
