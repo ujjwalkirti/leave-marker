@@ -160,3 +160,30 @@ export const reportsAPI = {
   downloadLeaveUsageCSV: (startDate: string, endDate: string, config?: any) =>
     api.get(`/reports/leave-usage/csv?startDate=${startDate}&endDate=${endDate}`, config),
 };
+
+// Plan APIs
+export const planAPI = {
+  getAllPlans: () => api.get('/plans'),
+  getActivePlans: () => api.get('/plans/active'),
+  getPlanById: (id: number) => api.get(`/plans/${id}`),
+  createPlan: (data: any) => api.post('/plans', data),
+  updatePlan: (id: number, data: any) => api.put(`/plans/${id}`, data),
+  deletePlan: (id: number) => api.delete(`/plans/${id}`),
+};
+
+// Subscription APIs
+export const subscriptionAPI = {
+  getActiveSubscription: () => api.get('/subscriptions/active'),
+  getCompanySubscriptions: () => api.get('/subscriptions'),
+  getFeatures: () => api.get('/subscriptions/features'),
+  createSubscription: (data: any) => api.post('/subscriptions', data),
+  updateSubscription: (id: number, data: any) => api.put(`/subscriptions/${id}`, data),
+  cancelSubscription: (id: number) => api.post(`/subscriptions/${id}/cancel`),
+};
+
+// Payment APIs
+export const paymentAPI = {
+  getCompanyPayments: () => api.get('/payments'),
+  getPaymentById: (id: number) => api.get(`/payments/${id}`),
+  initiatePayment: (data: any) => api.post('/payments/initiate', data),
+};

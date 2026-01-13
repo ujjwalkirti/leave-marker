@@ -3,20 +3,24 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
+import { useSubscription } from '@/lib/subscription-context';
 import DashboardLayout from '@/components/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { attendanceAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Calendar, Clock, Users, FileText, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Users, FileText, Loader2, Lock, Sparkles } from 'lucide-react';
 
 export default function DashboardPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const { features } = useSubscription();
   const [todayAttendance, setTodayAttendance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [punchingIn, setPunchingIn] = useState(false);
   const [punchingOut, setPunchingOut] = useState(false);
+
+  const hasAttendanceRateAnalytics = features?.attendanceRateAnalytics ?? false;
 
   useEffect(() => {
     fetchTodayAttendance();
@@ -201,16 +205,37 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className={!hasAttendanceRateAnalytics ? 'border-amber-200 bg-amber-50' : ''}>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-gray-500">
                 Attendance Rate
               </CardTitle>
-              <Clock className="h-4 w-4 text-gray-400" />
+              {hasAttendanceRateAnalytics ? (
+                <Clock className="h-4 w-4 text-gray-400" />
+              ) : (
+                <Lock className="h-4 w-4 text-amber-500" />
+              )}
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">-</div>
-              <p className="text-xs text-gray-500 mt-1">this month</p>
+              {hasAttendanceRateAnalytics ? (
+                <>
+                  <div className="text-2xl font-bold">-</div>
+                  <p className="text-xs text-gray-500 mt-1">this month</p>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-xs text-amber-700">Pro feature</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-7 border-amber-300 text-amber-700 hover:bg-amber-100"
+                    onClick={() => router.push('/pricing')}
+                  >
+                    <Sparkles className="mr-1 h-3 w-3" />
+                    Upgrade
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
 

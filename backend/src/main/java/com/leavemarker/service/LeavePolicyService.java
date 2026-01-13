@@ -22,11 +22,15 @@ public class LeavePolicyService {
 
     private final LeavePolicyRepository leavePolicyRepository;
     private final CompanyRepository companyRepository;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     @Transactional
     public LeavePolicyResponse createLeavePolicy(LeavePolicyRequest request, UserPrincipal currentUser) {
         Company company = companyRepository.findById(currentUser.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+        // Check subscription plan limits
+        subscriptionFeatureService.validateCanAddLeavePolicy(company.getId());
 
         if (leavePolicyRepository.existsByCompanyIdAndLeaveTypeAndDeletedFalse(
                 company.getId(), request.getLeaveType())) {

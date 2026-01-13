@@ -18,4 +18,6 @@ public interface LeavePolicyRepository extends JpaRepository<LeavePolicy, Long> 
     Optional<LeavePolicy> findByCompanyIdAndLeaveTypeAndDeletedFalse(Long companyId, LeaveType leaveType);
 
     boolean existsByCompanyIdAndLeaveTypeAndDeletedFalse(Long companyId, LeaveType leaveType);
+
+    long countByCompanyIdAndDeletedFalse(Long companyId);
 }

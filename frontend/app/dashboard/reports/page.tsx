@@ -1,23 +1,34 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { reportsAPI } from '@/lib/api';
+import { useSubscription } from '@/lib/subscription-context';
 import { toast } from 'sonner';
-import { Loader2, Download, FileSpreadsheet, FileText, Calendar, Clock, BarChart3 } from 'lucide-react';
+import { Loader2, Download, FileSpreadsheet, FileText, Calendar, Clock, BarChart3, Lock, Sparkles } from 'lucide-react';
 
 export default function ReportsPage() {
+  const router = useRouter();
+  const { features, loading: featuresLoading } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
 
+  const hasReportsAccess = features?.advancedReports ?? false;
+
   const downloadReport = async (reportType: string, format: 'excel' | 'csv') => {
+    if (!hasReportsAccess) {
+      toast.error('Reports are available on Pro and Enterprise plans. Please upgrade to access.');
+      return;
+    }
+
     const loadingKey = `${reportType}-${format}`;
     setLoading(loadingKey);
 
@@ -71,6 +82,111 @@ export default function ReportsPage() {
   const isLoading = (reportType: string, format: string) => {
     return loading === `${reportType}-${format}`;
   };
+
+  // Show upgrade prompt for free users
+  if (!featuresLoading && !hasReportsAccess) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
+            <p className="text-gray-500 mt-1">Download various reports in Excel or CSV format</p>
+          </div>
+
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center justify-center text-center py-8">
+                <div className="bg-amber-100 p-4 rounded-full mb-4">
+                  <Lock className="h-8 w-8 text-amber-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Unlock Advanced Reports
+                </h2>
+                <p className="text-gray-600 max-w-md mb-6">
+                  Advanced reports are available on Pro and Enterprise plans. Upgrade now to download
+                  comprehensive leave balance, attendance, and usage reports.
+                </p>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => router.push('/pricing')}
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Upgrade Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    Back to Dashboard
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Preview of reports (disabled) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 opacity-50 pointer-events-none">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="bg-indigo-100 p-3 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Leave Balance Report</CardTitle>
+                    <CardDescription>
+                      Employee leave balances for current year
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Button disabled className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Excel
+                  </Button>
+                  <Button disabled variant="outline" className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <Clock className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Attendance Report</CardTitle>
+                    <CardDescription>
+                      Employee attendance for selected period
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Button disabled className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Excel
+                  </Button>
+                  <Button disabled variant="outline" className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

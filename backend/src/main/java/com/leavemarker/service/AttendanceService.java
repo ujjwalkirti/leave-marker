@@ -26,11 +26,15 @@ public class AttendanceService {
 
     private final AttendanceRepository attendanceRepository;
     private final EmployeeRepository employeeRepository;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     @Transactional
     public AttendanceResponse punchInOut(AttendancePunchRequest request, UserPrincipal currentUser) {
         Employee employee = employeeRepository.findByIdAndDeletedFalse(currentUser.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        // Check if attendance tracking is available on their plan
+        subscriptionFeatureService.validateAttendanceAccess(currentUser.getCompanyId());
 
         if (!request.getDate().equals(LocalDate.now())) {
             throw new BadRequestException("Can only punch in/out for today's date");

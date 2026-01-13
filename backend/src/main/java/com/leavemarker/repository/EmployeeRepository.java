@@ -31,4 +31,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query("SELECT COUNT(e) FROM Employee e WHERE e.company.id = :companyId AND e.deleted = false")
     long countByCompanyId(@Param("companyId") Long companyId);
+
+    long countByCompanyIdAndDeletedFalse(Long companyId);
 }

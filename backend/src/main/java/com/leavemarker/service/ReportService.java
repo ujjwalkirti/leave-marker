@@ -25,8 +25,11 @@ public class ReportService {
     private final LeaveBalanceRepository leaveBalanceRepository;
     private final LeaveApplicationRepository leaveApplicationRepository;
     private final AttendanceRepository attendanceRepository;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     public byte[] generateLeaveBalanceReport(Integer year, UserPrincipal currentUser, String format) {
+        // Check if advanced reports are available on their plan
+        subscriptionFeatureService.validateReportsAccess(currentUser.getCompanyId());
         List<LeaveBalance> balances = leaveBalanceRepository
                 .findByEmployeeCompanyIdAndYearAndDeletedFalse(currentUser.getCompanyId(), year);
 
@@ -41,6 +44,9 @@ public class ReportService {
 
     public byte[] generateAttendanceReport(LocalDate startDate, LocalDate endDate,
                                            UserPrincipal currentUser, String format) {
+        // Check if advanced reports are available on their plan
+        subscriptionFeatureService.validateReportsAccess(currentUser.getCompanyId());
+
         List<Attendance> attendances = attendanceRepository
                 .findByCompanyIdAndDateRange(currentUser.getCompanyId(), startDate, endDate);
 
@@ -55,6 +61,9 @@ public class ReportService {
 
     public byte[] generateLeaveUsageReport(LocalDate startDate, LocalDate endDate,
                                            UserPrincipal currentUser, String format) {
+        // Check if advanced reports are available on their plan
+        subscriptionFeatureService.validateReportsAccess(currentUser.getCompanyId());
+
         List<LeaveApplication> leaves = leaveApplicationRepository
                 .findByCompanyIdAndDateRange(currentUser.getCompanyId(), startDate, endDate);
 

@@ -12,7 +12,6 @@ import com.leavemarker.repository.CompanyRepository;
 import com.leavemarker.repository.EmployeeRepository;
 import com.leavemarker.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,19 +26,15 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.max-employees-per-company}")
-    private int maxEmployeesPerCompany;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest request, UserPrincipal currentUser) {
         Company company = companyRepository.findById(currentUser.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-        long employeeCount = employeeRepository.countByCompanyId(company.getId());
-        if (employeeCount >= maxEmployeesPerCompany) {
-            throw new BadRequestException("Maximum employee limit reached for this company");
-        }
+        // Check subscription plan limits
+        subscriptionFeatureService.validateCanAddEmployee(company.getId());
 
         if (employeeRepository.existsByCompanyIdAndEmailAndDeletedFalse(company.getId(), request.getEmail())) {
             throw new BadRequestException("Employee with this email already exists");
