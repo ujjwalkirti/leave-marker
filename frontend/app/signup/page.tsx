@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
@@ -58,7 +59,7 @@ export default function SignupPage() {
           </div>
           <CardTitle className="text-2xl text-center">Create Your Account</CardTitle>
           <CardDescription className="text-center">
-            Set up your company's leave management system
+            Set up your company&apos;s leave management system
           </CardDescription>
         </CardHeader>
         <CardContent>

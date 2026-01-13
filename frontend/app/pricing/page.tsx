@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -5,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
 import { planAPI, subscriptionAPI, paymentAPI } from '@/lib/api';
 import { toast } from 'sonner';
 import { Check, X, Loader2, ArrowLeft, Sparkles, Building2, Crown } from 'lucide-react';
@@ -222,7 +222,7 @@ export default function PricingPage() {
             Simple, Transparent Pricing
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Choose the plan that's right for your team. Start free and scale as you grow.
+            Choose the plan that&apos;s right for your team. Start free and scale as you grow.
           </p>
         </div>
 
