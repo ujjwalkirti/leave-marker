@@ -35,5 +35,6 @@ public class Holiday extends BaseEntity {
     private IndianState state;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean active = true;
 }

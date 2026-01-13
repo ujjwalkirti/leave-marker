@@ -19,8 +19,10 @@ public class Company extends BaseEntity {
     private String email;
 
     @Column(nullable = false, length = 50)
+    @Builder.Default
     private String timezone = "Asia/Kolkata";
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean active = true;
 }

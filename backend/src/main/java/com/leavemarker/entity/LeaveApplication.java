@@ -34,6 +34,7 @@ public class LeaveApplication extends BaseEntity {
     private Double numberOfDays;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean isHalfDay = false;
 
     @Column(length = 1000)
@@ -44,6 +45,7 @@ public class LeaveApplication extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private LeaveStatus status = LeaveStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,5 +69,6 @@ public class LeaveApplication extends BaseEntity {
     private LocalDate rejectionDate;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean requiresHrApproval = false;
 }

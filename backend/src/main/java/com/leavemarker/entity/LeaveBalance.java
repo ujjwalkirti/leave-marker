@@ -28,17 +28,22 @@ public class LeaveBalance extends BaseEntity {
     private Integer year;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double totalQuota = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double used = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double pending = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double available = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double carriedForward = 0.0;
 }

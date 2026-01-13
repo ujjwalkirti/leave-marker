@@ -28,20 +28,26 @@ public class LeavePolicy extends BaseEntity {
     private Integer annualQuota;
 
     @Column(nullable = false)
+    @Builder.Default
     private Double monthlyAccrual = 0.0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean carryForward = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private Integer maxCarryForward = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean encashmentAllowed = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean halfDayAllowed = true;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean active = true;
 }

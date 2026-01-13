@@ -45,8 +45,10 @@ public class Attendance extends BaseEntity {
     private String remarks;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean correctionRequested = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean correctionApproved = false;
 }
