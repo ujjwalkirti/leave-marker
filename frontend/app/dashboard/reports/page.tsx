@@ -94,10 +94,10 @@ export default function ReportsPage() {
             <p className="text-muted-foreground mt-1">Download various reports in Excel or CSV format</p>
           </div>
 
-          <Card className="border-amber-200 bg-amber-50">
+          <Card className="border-orange-200 bg-orange-50/50">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center justify-center text-center py-8">
-                <div className="bg-amber-100 p-4 rounded-full mb-4">
+                <div className="bg-orange-100/70 p-4 rounded-full mb-4">
                   <Lock className="h-8 w-8 text-amber-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-foreground mb-2">
