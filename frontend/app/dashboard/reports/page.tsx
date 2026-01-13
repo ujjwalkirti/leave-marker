@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
@@ -437,21 +438,21 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-blue-900">
               <div className="flex items-start gap-2">
-                <FileSpreadsheet className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <FileSpreadsheet className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   <strong>Excel files (.xlsx)</strong> include formatting and are best for
                   viewing and analysis in spreadsheet applications.
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <FileText className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   <strong>CSV files (.csv)</strong> are plain text and can be imported into
                   any system or database.
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <Calendar className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   Use the date range filter above to customize attendance and leave usage
                   reports for specific time periods.

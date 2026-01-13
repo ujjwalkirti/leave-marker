@@ -148,9 +148,9 @@ export default function PricingPage() {
   const Feature = ({ included, text }: { included: boolean; text: string }) => (
     <div className="flex items-start gap-3">
       {included ? (
-        <Check className="h-5 w-5 mt-0.5 text-green-600 flex-shrink-0" />
+        <Check className="h-5 w-5 mt-0.5 text-green-600 shrink-0" />
       ) : (
-        <X className="h-5 w-5 mt-0.5 text-gray-300 flex-shrink-0" />
+        <X className="h-5 w-5 mt-0.5 text-gray-300 shrink-0" />
       )}
       <span className={included ? 'text-gray-700' : 'text-gray-400'}>{text}</span>
     </div>
@@ -204,7 +204,7 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
         <div className="text-center mb-12">
