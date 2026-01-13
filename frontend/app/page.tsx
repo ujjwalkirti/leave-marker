@@ -166,7 +166,7 @@ export default function Home() {
               <CardContent className="p-0">
                 <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-12">
                   <div className="space-y-4">
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
                       <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
                         <CheckCircle className="h-6 w-6 text-green-600" />
                       </div>
@@ -175,7 +175,7 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground">Your vacation request was approved</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <Clock className="h-6 w-6 text-primary" />
                       </div>
@@ -184,7 +184,7 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground">Punched in at 09:00 AM</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex items-center gap-4 bg-card p-4 rounded-lg shadow-sm">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                         <TrendingUp className="h-6 w-6 text-primary" />
                       </div>
@@ -202,7 +202,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-card">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
@@ -235,7 +235,7 @@ export default function Home() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-gradient-to-br from-indigo-50 to-purple-50">
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -305,7 +305,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white text-primary hover:bg-accent text-lg px-8"
+              className="bg-card text-primary hover:bg-accent text-lg px-8"
               onClick={() => router.push('/signup')}
             >
               Start Free Trial
