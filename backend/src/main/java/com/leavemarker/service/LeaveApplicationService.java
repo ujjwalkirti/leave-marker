@@ -8,7 +8,6 @@ import com.leavemarker.entity.LeaveApplication;
 import com.leavemarker.entity.LeaveBalance;
 import com.leavemarker.entity.LeavePolicy;
 import com.leavemarker.enums.LeaveStatus;
-import com.leavemarker.enums.Role;
 import com.leavemarker.exception.BadRequestException;
 import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.EmployeeRepository;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
