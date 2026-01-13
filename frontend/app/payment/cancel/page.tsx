@@ -20,10 +20,10 @@ export default function PaymentCancelPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Your payment was cancelled. No charges have been made to your account.
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             If you encountered any issues, please contact our support team.
           </p>
           <div className="flex gap-3">

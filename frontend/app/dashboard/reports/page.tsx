@@ -90,8 +90,8 @@ export default function ReportsPage() {
       <DashboardLayout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-            <p className="text-gray-500 mt-1">Download various reports in Excel or CSV format</p>
+            <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+            <p className="text-muted-foreground mt-1">Download various reports in Excel or CSV format</p>
           </div>
 
           <Card className="border-amber-200 bg-amber-50">
@@ -100,17 +100,17 @@ export default function ReportsPage() {
                 <div className="bg-amber-100 p-4 rounded-full mb-4">
                   <Lock className="h-8 w-8 text-amber-600" />
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
                   Unlock Advanced Reports
                 </h2>
-                <p className="text-gray-600 max-w-md mb-6">
+                <p className="text-muted-foreground max-w-md mb-6">
                   Advanced reports are available on Pro and Enterprise plans. Upgrade now to download
                   comprehensive leave balance, attendance, and usage reports.
                 </p>
                 <div className="flex gap-4">
                   <Button
                     onClick={() => router.push('/pricing')}
-                    className="bg-indigo-600 hover:bg-indigo-700"
+                    className="bg-primary hover:bg-primary/90"
                   >
                     <Sparkles className="mr-2 h-4 w-4" />
                     Upgrade Now
@@ -131,8 +131,8 @@ export default function ReportsPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="bg-indigo-100 p-3 rounded-lg">
-                    <BarChart3 className="h-6 w-6 text-indigo-600" />
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-primary" />
                   </div>
                   <div>
                     <CardTitle>Leave Balance Report</CardTitle>
@@ -193,8 +193,8 @@ export default function ReportsPage() {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500 mt-1">Download various reports in Excel or CSV format</p>
+          <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+          <p className="text-muted-foreground mt-1">Download various reports in Excel or CSV format</p>
         </div>
 
         {/* Date Range Filter */}
@@ -239,8 +239,8 @@ export default function ReportsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-indigo-100 p-3 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-indigo-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle>Leave Balance Report</CardTitle>
@@ -252,7 +252,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download a comprehensive report showing leave balances for all employees,
                   including available, used, and carried forward leaves.
                 </p>
@@ -314,7 +314,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download attendance records for all employees within the selected date range,
                   including punch in/out times and work hours.
                 </p>
@@ -363,8 +363,8 @@ export default function ReportsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Calendar className="h-6 w-6 text-purple-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle>Leave Usage Report</CardTitle>
@@ -376,7 +376,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download detailed leave usage statistics, including approved leaves by type,
                   employee, and department for the selected period.
                 </p>
@@ -422,21 +422,21 @@ export default function ReportsPage() {
           </Card>
 
           {/* Info Card */}
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-primary/5 border-blue-200">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Download className="h-6 w-6 text-blue-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <Download className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-blue-900">Report Information</CardTitle>
-                  <CardDescription className="text-blue-700">
+                  <CardTitle className="text-foreground">Report Information</CardTitle>
+                  <CardDescription className="text-primary">
                     Tips for using reports
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-blue-900">
+            <CardContent className="space-y-3 text-sm text-foreground">
               <div className="flex items-start gap-2">
                 <FileSpreadsheet className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>

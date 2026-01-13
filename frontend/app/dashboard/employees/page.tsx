@@ -175,8 +175,8 @@ export default function EmployeesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
-            <p className="text-gray-500 mt-1">Manage your company employees</p>
+            <h1 className="text-3xl font-bold">Employees</h1>
+            <p className="text-muted-foreground mt-1">Manage your company employees</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
@@ -349,10 +349,10 @@ export default function EmployeesPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : employees.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No employees found. Add your first employee to get started.
               </p>
             ) : (

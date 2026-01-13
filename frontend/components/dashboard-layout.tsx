@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/theme-toggle';
 import {
   Building2,
   Users,
@@ -98,18 +99,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const filteredNavigation = navigation.filter(canAccessRoute);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-white shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-card shadow-lg transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -117,14 +118,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Logo */}
           <div className="flex h-16 items-center justify-between px-6 border-b">
             <div className="flex items-center gap-2">
-              <div className="bg-indigo-600 text-white p-2 rounded-lg">
+              <div className="bg-primary text-primary-foreground p-2 rounded-lg">
                 <Building2 className="h-6 w-6" />
               </div>
-              <span className="text-lg font-semibold text-gray-900">LeaveMarker</span>
+              <span className="text-lg font-semibold">LeaveMarker</span>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-muted-foreground hover:text-foreground"
             >
               <X className="h-6 w-6" />
             </button>
@@ -143,8 +144,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                       isActive
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                     }`}
                   >
                     <Icon className="h-5 w-5" />
@@ -159,15 +160,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="border-t px-4 py-4">
             <div className="flex items-center gap-3 px-2">
               <Avatar>
-                <AvatarFallback className="bg-indigo-600 text-white">
+                <AvatarFallback className="bg-primary text-primary-foreground">
                   {user ? getInitials(user.fullName) : 'U'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium truncate">
                   {user?.fullName}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{user?.role.replace(/_/g, ' ')}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.role.replace(/_/g, ' ')}</p>
               </div>
             </div>
           </div>
@@ -177,11 +178,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main content area */}
       <div className="lg:pl-64">
         {/* Top header */}
-        <header className="sticky top-0 z-30 bg-white shadow-sm">
+        <header className="sticky top-0 z-30 bg-card shadow-sm border-b">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
+              className="lg:hidden text-muted-foreground hover:text-foreground"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -189,11 +190,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex-1" />
 
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar>
-                      <AvatarFallback className="bg-indigo-600 text-white">
+                      <AvatarFallback className="bg-primary text-primary-foreground">
                         {user ? getInitials(user.fullName) : 'U'}
                       </AvatarFallback>
                     </Avatar>

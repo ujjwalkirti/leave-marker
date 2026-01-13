@@ -4,7 +4,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
-import { useSubscription } from '@/lib/subscription-context';
 import DashboardLayout from '@/components/dashboard-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { leaveBalanceAPI, leaveApplicationAPI, employeeAPI } from '@/lib/api';
@@ -72,10 +71,10 @@ export default function DashboardPage() {
       <div className="space-y-6">
         {/* Welcome section */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold">
             Welcome back, {user?.fullName}!
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-muted-foreground mt-1">
             {new Date().toLocaleDateString('en-US', {
               weekday: 'long',
               year: 'numeric',
@@ -89,18 +88,18 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Total Leave Balance
               </CardTitle>
-              <Calendar className="h-4 w-4 text-gray-400" />
+              <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               {statsLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               ) : (
                 <>
                   <div className="text-2xl font-bold">{leaveBalance.toFixed(1)}</div>
-                  <p className="text-xs text-gray-500 mt-1">days available</p>
+                  <p className="text-xs text-muted-foreground mt-1">days available</p>
                 </>
               )}
             </CardContent>
@@ -108,18 +107,18 @@ export default function DashboardPage() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
                 Pending Applications
               </CardTitle>
-              <FileText className="h-4 w-4 text-gray-400" />
+              <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               {statsLoading ? (
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               ) : (
                 <>
                   <div className="text-2xl font-bold">{pendingApplications}</div>
-                  <p className="text-xs text-gray-500 mt-1">awaiting approval</p>
+                  <p className="text-xs text-muted-foreground mt-1">awaiting approval</p>
                 </>
               )}
             </CardContent>
@@ -128,18 +127,18 @@ export default function DashboardPage() {
           {(user?.role === 'SUPER_ADMIN' || user?.role === 'HR_ADMIN') && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
                   Total Employees
                 </CardTitle>
-                <Users className="h-4 w-4 text-gray-400" />
+                <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 {statsLoading ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 ) : (
                   <>
                     <div className="text-2xl font-bold">{totalEmployees}</div>
-                    <p className="text-xs text-gray-500 mt-1">active employees</p>
+                    <p className="text-xs text-muted-foreground mt-1">active employees</p>
                   </>
                 )}
               </CardContent>
@@ -159,9 +158,9 @@ export default function DashboardPage() {
                 className="h-auto flex flex-col items-start p-4"
                 onClick={() => router.push('/dashboard/leave-applications')}
               >
-                <FileText className="h-6 w-6 mb-2 text-indigo-600" />
+                <FileText className="h-6 w-6 mb-2 text-primary" />
                 <span className="font-semibold">Apply for Leave</span>
-                <span className="text-xs text-gray-500 mt-1">
+                <span className="text-xs text-muted-foreground mt-1">
                   Submit a new leave request
                 </span>
               </Button>
@@ -170,9 +169,9 @@ export default function DashboardPage() {
                 className="h-auto flex flex-col items-start p-4"
                 onClick={() => router.push('/dashboard/holidays')}
               >
-                <Calendar className="h-6 w-6 mb-2 text-indigo-600" />
+                <Calendar className="h-6 w-6 mb-2 text-primary" />
                 <span className="font-semibold">View Holidays</span>
-                <span className="text-xs text-gray-500 mt-1">
+                <span className="text-xs text-muted-foreground mt-1">
                   See upcoming company holidays
                 </span>
               </Button>

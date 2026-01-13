@@ -30,10 +30,10 @@ export default function PaymentSuccessPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             Your payment has been processed successfully. Your subscription is now active!
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             You will be redirected to the dashboard in a few seconds...
           </p>
           <Button

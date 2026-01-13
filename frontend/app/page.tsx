@@ -24,9 +24,9 @@ export default function Home() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -82,9 +82,9 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
@@ -113,18 +113,18 @@ export default function Home() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="inline-block">
-              <span className="px-4 py-2 rounded-full bg-indigo-100 text-indigo-700 text-sm font-semibold">
+              <span className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold">
                 Modern HR Solution
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold text-foreground leading-tight">
               Simplify Your
               <span className="block bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
                 Leave & Attendance
               </span>
               Management
             </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
+            <p className="text-xl text-muted-foreground leading-relaxed">
               Empower your HR team with a comprehensive platform that streamlines leave
               requests, attendance tracking, and employee management all in one place.
             </p>
@@ -143,18 +143,18 @@ export default function Home() {
             </div>
             <div className="flex items-center gap-8 pt-4">
               <div>
-                <p className="text-3xl font-bold text-gray-900">10K+</p>
-                <p className="text-sm text-gray-600">Active Users</p>
+                <p className="text-3xl font-bold text-foreground">10K+</p>
+                <p className="text-sm text-muted-foreground">Active Users</p>
               </div>
-              <div className="h-12 w-px bg-gray-300" />
+              <div className="h-12 w-px bg-border" />
               <div>
-                <p className="text-3xl font-bold text-gray-900">98%</p>
-                <p className="text-sm text-gray-600">Satisfaction Rate</p>
+                <p className="text-3xl font-bold text-foreground">98%</p>
+                <p className="text-sm text-muted-foreground">Satisfaction Rate</p>
               </div>
-              <div className="h-12 w-px bg-gray-300" />
+              <div className="h-12 w-px bg-border" />
               <div>
-                <p className="text-3xl font-bold text-gray-900">24/7</p>
-                <p className="text-sm text-gray-600">Support</p>
+                <p className="text-3xl font-bold text-foreground">24/7</p>
+                <p className="text-sm text-muted-foreground">Support</p>
               </div>
             </div>
           </div>
@@ -171,26 +171,26 @@ export default function Home() {
                         <CheckCircle className="h-6 w-6 text-green-600" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Leave Approved</p>
-                        <p className="text-sm text-gray-600">Your vacation request was approved</p>
+                        <p className="font-semibold text-foreground">Leave Approved</p>
+                        <p className="text-sm text-muted-foreground">Your vacation request was approved</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-                      <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                        <Clock className="h-6 w-6 text-blue-600" />
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Clock className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Attendance Marked</p>
-                        <p className="text-sm text-gray-600">Punched in at 09:00 AM</p>
+                        <p className="font-semibold text-foreground">Attendance Marked</p>
+                        <p className="text-sm text-muted-foreground">Punched in at 09:00 AM</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-                      <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-                        <TrendingUp className="h-6 w-6 text-purple-600" />
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                        <TrendingUp className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-900">Monthly Report Ready</p>
-                        <p className="text-sm text-gray-600">95% attendance this month</p>
+                        <p className="font-semibold text-foreground">Monthly Report Ready</p>
+                        <p className="text-sm text-muted-foreground">95% attendance this month</p>
                       </div>
                     </div>
                   </div>
@@ -205,10 +205,10 @@ export default function Home() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-foreground mb-4">
               Everything You Need to Manage Your Team
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Powerful features designed to simplify HR operations and improve productivity
             </p>
           </div>
@@ -223,10 +223,10 @@ export default function Home() {
                   <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center mb-4">
                     <feature.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-foreground mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -239,10 +239,10 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">
+              <h2 className="text-4xl font-bold text-foreground mb-6">
                 Why Choose LeaveMarker?
               </h2>
-              <p className="text-xl text-gray-600 mb-8">
+              <p className="text-xl text-muted-foreground mb-8">
                 Join thousands of companies that trust LeaveMarker to streamline their HR
                 operations and boost productivity.
               </p>
@@ -252,7 +252,7 @@ export default function Home() {
                     <div className="h-6 w-6 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <p className="text-gray-700 font-medium">{benefit}</p>
+                    <p className="text-muted-foreground font-medium">{benefit}</p>
                   </div>
                 ))}
               </div>
@@ -262,29 +262,29 @@ export default function Home() {
               <Card className="border-2">
                 <CardContent className="p-6 text-center">
                   <Zap className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                  <p className="text-3xl font-bold text-gray-900 mb-2">2x</p>
-                  <p className="text-gray-600">Faster Approvals</p>
+                  <p className="text-3xl font-bold text-foreground mb-2">2x</p>
+                  <p className="text-muted-foreground">Faster Approvals</p>
                 </CardContent>
               </Card>
               <Card className="border-2 mt-8">
                 <CardContent className="p-6 text-center">
-                  <Users className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                  <p className="text-3xl font-bold text-gray-900 mb-2">500+</p>
-                  <p className="text-gray-600">Companies</p>
+                  <Users className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <p className="text-3xl font-bold text-foreground mb-2">500+</p>
+                  <p className="text-muted-foreground">Companies</p>
                 </CardContent>
               </Card>
               <Card className="border-2">
                 <CardContent className="p-6 text-center">
                   <TrendingUp className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-3xl font-bold text-gray-900 mb-2">60%</p>
-                  <p className="text-gray-600">Time Saved</p>
+                  <p className="text-3xl font-bold text-foreground mb-2">60%</p>
+                  <p className="text-muted-foreground">Time Saved</p>
                 </CardContent>
               </Card>
               <Card className="border-2 mt-8">
                 <CardContent className="p-6 text-center">
-                  <Shield className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                  <p className="text-3xl font-bold text-gray-900 mb-2">100%</p>
-                  <p className="text-gray-600">Secure</p>
+                  <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <p className="text-3xl font-bold text-foreground mb-2">100%</p>
+                  <p className="text-muted-foreground">Secure</p>
                 </CardContent>
               </Card>
             </div>
@@ -298,14 +298,14 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your HR Operations?
           </h2>
-          <p className="text-xl text-indigo-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-primary-foreground mb-8 max-w-2xl mx-auto">
             Join thousands of companies using LeaveMarker to simplify leave management and
             boost productivity.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              className="bg-white text-indigo-600 hover:bg-gray-100 text-lg px-8"
+              className="bg-white text-primary hover:bg-accent text-lg px-8"
               onClick={() => router.push('/signup')}
             >
               Start Free Trial
@@ -323,7 +323,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12">
+      <footer className="bg-gray-900 text-muted-foreground py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
@@ -333,7 +333,7 @@ export default function Home() {
                 </div>
                 <span className="text-xl font-bold text-white">LeaveMarker</span>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Simplifying leave and attendance management for modern teams.
               </p>
             </div>
@@ -398,7 +398,7 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
+          <div className="border-t border-gray-800 pt-8 text-center text-sm text-muted-foreground">
             <p>&copy; 2026 LeaveMarker. All rights reserved.</p>
           </div>
         </div>

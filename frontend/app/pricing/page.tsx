@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { planAPI, subscriptionAPI, paymentAPI } from '@/lib/api';
 import { toast } from 'sonner';
-import { Check, X, Loader2, ArrowLeft, Sparkles, Building2, Zap, Users, FileText, Calendar, ClipboardCheck, BarChart3, Download, Layers, Infinity } from 'lucide-react';
+import { Check, X, Loader2, ArrowLeft, Sparkles, Building2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
 interface Plan {
@@ -154,18 +154,18 @@ export default function PricingPage() {
       {included ? (
         <Check className="h-5 w-5 mt-0.5 text-green-600 shrink-0" />
       ) : (
-        <X className="h-5 w-5 mt-0.5 text-gray-300 shrink-0" />
+        <X className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
       )}
-      <span className={included ? 'text-gray-700' : 'text-gray-400'}>{text}</span>
+      <span className={included ? 'text-muted-foreground' : 'text-muted-foreground'}>{text}</span>
     </div>
   );
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
       case 'FREE':
-        return <Sparkles className="h-6 w-6 text-gray-500" />;
+        return <Sparkles className="h-6 w-6 text-muted-foreground" />;
       case 'MID_TIER':
-        return <Building2 className="h-6 w-6 text-indigo-600" />;
+        return <Building2 className="h-6 w-6 text-primary" />;
       default:
         return null;
     }
@@ -245,14 +245,14 @@ export default function PricingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 relative">
+    <div className="min-h-screen bg-background relative">
       {/* Back Button */}
       {user && (
         <Button
@@ -269,26 +269,26 @@ export default function PricingPage() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold mb-4">
             Simple, Transparent Pricing
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Choose the plan that&apos;s right for your team. Start free and scale as you grow.
           </p>
         </div>
 
         {/* Billing Toggle */}
         <div className="flex items-center justify-center gap-4 mb-12">
-          <span className={`text-sm font-medium ${!isYearly ? 'text-gray-900' : 'text-gray-500'}`}>
+          <span className={`text-sm font-medium ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
             Monthly
           </span>
           <Switch
             checked={isYearly}
             onCheckedChange={setIsYearly}
           />
-          <span className={`text-sm font-medium ${isYearly ? 'text-gray-900' : 'text-gray-500'}`}>
+          <span className={`text-sm font-medium ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
             Yearly
-            <span className="ml-2 text-green-600 font-semibold">(Save up to 20%)</span>
+            <span className="ml-2 text-primary font-semibold">(Save up to 20%)</span>
           </span>
         </div>
 
@@ -307,7 +307,7 @@ export default function PricingPage() {
               >
                 {plan.tier === 'MID_TIER' && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-indigo-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
                       Most Popular
                     </span>
                   </div>
@@ -329,7 +329,7 @@ export default function PricingPage() {
                     {plan.tier === 'FREE' ? (
                       <div>
                         <span className="text-4xl font-bold">Free</span>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Up to {plan.maxEmployees} employees
                         </p>
                       </div>
@@ -338,7 +338,7 @@ export default function PricingPage() {
                         <span className="text-4xl font-bold">
                           ₹{getPrice(plan).toLocaleString('en-IN')}
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-muted-foreground">
                           /employee/{isYearly ? 'year' : 'month'}
                         </span>
                         {isYearly && savings > 0 && (
@@ -346,7 +346,7 @@ export default function PricingPage() {
                             Save {savings}% with yearly billing
                           </p>
                         )}
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Unlimited employees
                         </p>
                       </div>
@@ -396,8 +396,8 @@ export default function PricingPage() {
                   {/* Add-on pricing for MID_TIER */}
                   {plan.tier === 'MID_TIER' && plan.reportDownloadPriceUnder50 > 0 && (
                     <div className="pt-4 border-t">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">Optional Add-on:</p>
-                      <div className="text-sm text-gray-600 space-y-1">
+                      <p className="text-xs font-semibold text-muted-foreground mb-2">Optional Add-on:</p>
+                      <div className="text-sm text-muted-foreground space-y-1">
                         <p>• Report Download: ₹{plan.reportDownloadPriceUnder50}/month (&lt;50 employees)</p>
                         <p>• Report Download: ₹{plan.reportDownloadPrice50Plus}/month (≥50 employees)</p>
                       </div>
@@ -443,7 +443,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   The free plan is perfect for small teams of up to 10 employees. You get full access to leave and holiday management with 1 leave policy and up to 6 holidays per year. No credit card required!
                 </p>
               </CardContent>
@@ -455,7 +455,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   The Mid-Tier plan is priced at ₹100 per employee per month (or ₹1,000 per employee per year). You only pay for the number of active employees in your organization, giving you complete flexibility as your team grows.
                 </p>
               </CardContent>
@@ -467,7 +467,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   The Report Download add-on allows you to export comprehensive reports. Pricing is ₹200/month for companies with less than 50 employees and ₹400/month for companies with 50 or more employees. This is optional and can be added to any Mid-Tier subscription.
                 </p>
               </CardContent>
@@ -479,7 +479,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Yes! You can upgrade from Free to Mid-Tier at any time. Your billing will be prorated based on the remaining days in your billing cycle. Changes take effect immediately.
                 </p>
               </CardContent>
@@ -491,7 +491,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   We accept all major payment methods through Dodo Payments including credit cards, debit cards, UPI, and net banking.
                 </p>
               </CardContent>
@@ -503,7 +503,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   No! Both monthly and yearly plans can be cancelled anytime with no penalties. Yearly plans offer better value with significant savings compared to monthly billing.
                 </p>
               </CardContent>

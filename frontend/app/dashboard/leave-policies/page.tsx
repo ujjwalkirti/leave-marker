@@ -210,8 +210,8 @@ export default function LeavePoliciesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leave Policies</h1>
-            <p className="text-gray-500 mt-1">Manage company leave policies</p>
+            <h1 className="text-3xl font-bold text-foreground">Leave Policies</h1>
+            <p className="text-muted-foreground mt-1">Manage company leave policies</p>
           </div>
           <div className="flex gap-3">
             {(user?.role === 'SUPER_ADMIN' || user?.role === 'HR_ADMIN') && (
@@ -219,7 +219,7 @@ export default function LeavePoliciesPage() {
                 onClick={handleInitializeBalances}
                 disabled={initializingBalances}
                 variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="border-primary text-primary hover:bg-primary/5"
               >
                 {initializingBalances ? (
                   <>
@@ -412,10 +412,10 @@ export default function LeavePoliciesPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : policies.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No leave policies found. Add your first policy to get started.
               </p>
             ) : (
@@ -465,7 +465,7 @@ export default function LeavePoliciesPage() {
                               onCheckedChange={() => handleToggleActive(policy)}
                               disabled={togglingPolicy === policy.id}
                             />
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-muted-foreground">
                               {policy.active ? 'Active' : 'Inactive'}
                             </span>
                           </div>

@@ -217,7 +217,7 @@ export default function LeaveApplicationsPage() {
         <TableBody>
           {applications.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={showActions ? 8 : 7} className="text-center text-gray-500 py-8">
+              <TableCell colSpan={showActions ? 8 : 7} className="text-center text-muted-foreground py-8">
                 No applications found
               </TableCell>
             </TableRow>
@@ -276,8 +276,8 @@ export default function LeaveApplicationsPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leave Applications</h1>
-            <p className="text-gray-500 mt-1">Manage your leave requests</p>
+            <h1 className="text-3xl font-bold text-foreground">Leave Applications</h1>
+            <p className="text-muted-foreground mt-1">Manage your leave requests</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
@@ -397,7 +397,7 @@ export default function LeaveApplicationsPage() {
               <TabsContent value="my-applications">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 ) : (
                   renderLeaveTable(myApplications, false)

@@ -37,7 +37,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-indigo-600 text-white p-3 rounded-lg">
+            <div className="bg-primary text-white p-3 rounded-lg">
               <Building2 className="h-8 w-8" />
             </div>
           </div>
@@ -84,7 +84,7 @@ export default function LoginPage() {
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>
-            <Link href="/signup" className="text-indigo-600 hover:underline font-medium">
+            <Link href="/signup" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
           </div>

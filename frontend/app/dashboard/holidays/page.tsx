@@ -155,12 +155,12 @@ export default function HolidaysPage() {
 
   const getTypeBadge = (type: string) => {
     const colors: { [key: string]: string } = {
-      NATIONAL: 'bg-blue-100 text-blue-700',
+      NATIONAL: 'bg-primary/10 text-primary',
       REGIONAL: 'bg-green-100 text-green-700',
-      COMPANY: 'bg-purple-100 text-purple-700',
+      COMPANY: 'bg-primary/10 text-primary',
     };
     return (
-      <Badge className={colors[type] || 'bg-gray-100 text-gray-700'}>
+      <Badge className={colors[type] || 'bg-accent text-muted-foreground'}>
         {type}
       </Badge>
     );
@@ -175,8 +175,8 @@ export default function HolidaysPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Holidays</h1>
-            <p className="text-gray-500 mt-1">Manage company holiday calendar</p>
+            <h1 className="text-3xl font-bold text-foreground">Holidays</h1>
+            <p className="text-muted-foreground mt-1">Manage company holiday calendar</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
@@ -308,10 +308,10 @@ export default function HolidaysPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : holidays.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No holidays found. Add your first holiday to get started.
               </p>
             ) : (
