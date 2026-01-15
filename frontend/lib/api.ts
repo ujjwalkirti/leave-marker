@@ -227,5 +227,18 @@ export const subscriptionAPI = {
 export const paymentAPI = {
   getCompanyPayments: () => api.get('/payments'),
   getPaymentById: (id: number) => api.get(`/payments/${id}`),
-  initiatePayment: (data: any) => api.post('/payments/initiate', data),
+  initiatePayment: (data: { subscriptionId: number; amount: number }) =>
+    api.post('/payments/initiate', data),
+  verifyPayment: (data: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) => api.post('/payments/verify', data),
+  retryPayment: (id: number) => api.post(`/payments/${id}/retry`),
+};
+
+// Contact API (public)
+export const contactAPI = {
+  sendMessage: (data: { name: string; email: string; phone?: string; message: string }) =>
+    api.post('/contact', data),
 };

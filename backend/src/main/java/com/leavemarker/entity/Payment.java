@@ -12,7 +12,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "payments", indexes = {
     @Index(name = "idx_payment_transaction_id", columnList = "transactionId"),
-    @Index(name = "idx_payment_dodo_id", columnList = "dodoPaymentId"),
+    @Index(name = "idx_payment_razorpay_order_id", columnList = "razorpayOrderId"),
+    @Index(name = "idx_payment_razorpay_payment_id", columnList = "razorpayPaymentId"),
     @Index(name = "idx_payment_company", columnList = "company_id"),
     @Index(name = "idx_payment_status", columnList = "status")
 })
@@ -35,13 +36,17 @@ public class Payment extends BaseEntity {
     @Column(nullable = false, unique = true, length = 100)
     private String transactionId;
 
-    // External payment gateway ID
+    // Razorpay Order ID (created before payment)
     @Column(length = 100)
-    private String dodoPaymentId;
+    private String razorpayOrderId;
 
-    // External order ID if different
+    // Razorpay Payment ID (after successful payment)
     @Column(length = 100)
-    private String dodoOrderId;
+    private String razorpayPaymentId;
+
+    // Razorpay Signature (for verification)
+    @Column(length = 256)
+    private String razorpaySignature;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

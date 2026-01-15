@@ -1,6 +1,6 @@
 package com.leavemarker.service;
 
-import com.leavemarker.config.DodoPaymentConfig;
+import com.leavemarker.config.RazorpayConfig;
 import com.leavemarker.dto.payment.*;
 import com.leavemarker.entity.Company;
 import com.leavemarker.entity.Payment;
@@ -14,19 +14,20 @@ import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.CompanyRepository;
 import com.leavemarker.repository.PaymentRepository;
 import com.leavemarker.repository.SubscriptionRepository;
+import com.razorpay.Order;
+import com.razorpay.RazorpayClient;
+import com.razorpay.RazorpayException;
+import com.razorpay.Utils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.*;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,8 +39,8 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final CompanyRepository companyRepository;
-    private final DodoPaymentConfig dodoPaymentConfig;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RazorpayConfig razorpayConfig;
+    private final RazorpayClient razorpayClient;
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> getCompanyPayments(Long companyId) {
@@ -103,20 +104,22 @@ public class PaymentService {
         Payment savedPayment = paymentRepository.save(payment);
 
         try {
-            // Call Dodo Payments API
-            String dodoPaymentId = createDodoPayment(savedPayment);
-            savedPayment.setDodoPaymentId(dodoPaymentId);
+            // Create Razorpay Order
+            String razorpayOrderId = createRazorpayOrder(savedPayment);
+            savedPayment.setRazorpayOrderId(razorpayOrderId);
             paymentRepository.save(savedPayment);
 
-            String paymentUrl = dodoPaymentConfig.getBaseUrl() + "/checkout/" + dodoPaymentId;
-
-            log.info("Payment initiated for company: {}, transaction: {}, idempotency: {}",
-                    companyId, transactionId, idempotencyKey);
+            log.info("Payment initiated for company: {}, transaction: {}, razorpayOrderId: {}",
+                    companyId, transactionId, razorpayOrderId);
 
             return PaymentInitiateResponse.builder()
-                    .paymentUrl(paymentUrl)
+                    .razorpayOrderId(razorpayOrderId)
+                    .razorpayKeyId(razorpayConfig.getKeyId())
+                    .amount(savedPayment.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue())
+                    .currency(savedPayment.getCurrency())
                     .transactionId(transactionId)
-                    .dodoPaymentId(dodoPaymentId)
+                    .companyName(company.getName())
+                    .companyEmail(company.getEmail())
                     .build();
 
         } catch (Exception e) {
@@ -130,55 +133,144 @@ public class PaymentService {
     }
 
     @Transactional
-    public void handleWebhook(PaymentWebhookRequest webhookRequest, String rawPayload) {
-        Payment payment = paymentRepository.findByDodoPaymentId(webhookRequest.getDodoPaymentId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with dodoPaymentId: " + webhookRequest.getDodoPaymentId()));
+    public PaymentResponse verifyAndCompletePayment(PaymentVerifyRequest verifyRequest) {
+        Payment payment = paymentRepository.findByRazorpayOrderId(verifyRequest.getRazorpayOrderId())
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with razorpayOrderId: " + verifyRequest.getRazorpayOrderId()));
 
         LocalDateTime now = LocalDateTime.now();
 
-        // Track webhook receipt
-        payment.setWebhookStatus(webhookRequest.getStatus());
-        payment.setWebhookReceivedAt(now);
-        payment.setWebhookPayload(rawPayload);
+        try {
+            // Verify signature
+            JSONObject options = new JSONObject();
+            options.put("razorpay_order_id", verifyRequest.getRazorpayOrderId());
+            options.put("razorpay_payment_id", verifyRequest.getRazorpayPaymentId());
+            options.put("razorpay_signature", verifyRequest.getRazorpaySignature());
 
-        String status = webhookRequest.getStatus();
+            boolean isValidSignature = Utils.verifyPaymentSignature(options, razorpayConfig.getKeySecret());
 
-        switch (status.toUpperCase()) {
-            case "SUCCESS", "COMPLETED" -> {
-                payment.setStatus(PaymentStatus.SUCCESS);
-                payment.setPaidAt(now);
-                payment.setPaymentMethod(webhookRequest.getPaymentMethod());
-
-                // Update subscription
-                Subscription subscription = payment.getSubscription();
-                subscription.setIsPaid(true);
-                subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
-                subscription.setEndDate(payment.getPeriodEnd());
-                subscription.setStatus(SubscriptionStatus.ACTIVE);
-                subscriptionRepository.save(subscription);
-
-                log.info("Payment successful for transaction: {}, subscription marked as paid", payment.getTransactionId());
-            }
-            case "FAILED" -> {
+            if (!isValidSignature) {
                 payment.setStatus(PaymentStatus.FAILED);
                 payment.setFailedAt(now);
-                payment.setFailureReason("Payment failed via webhook");
-                log.warn("Payment failed for transaction: {}", payment.getTransactionId());
+                payment.setFailureReason("Invalid payment signature");
+                paymentRepository.save(payment);
+                throw new BadRequestException("Invalid payment signature");
             }
-            case "REFUNDED" -> {
-                payment.setStatus(PaymentStatus.REFUNDED);
-                payment.setRefundedAt(now);
-                log.info("Payment refunded for transaction: {}", payment.getTransactionId());
-            }
-            default -> log.warn("Unknown payment status received: {}", status);
-        }
 
-        payment.setMetadata(webhookRequest.getMetadata());
-        paymentRepository.save(payment);
+            // Update payment with Razorpay details
+            payment.setRazorpayPaymentId(verifyRequest.getRazorpayPaymentId());
+            payment.setRazorpaySignature(verifyRequest.getRazorpaySignature());
+            payment.setStatus(PaymentStatus.SUCCESS);
+            payment.setPaidAt(now);
+
+            // Update subscription
+            Subscription subscription = payment.getSubscription();
+            subscription.setIsPaid(true);
+            subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
+            subscription.setEndDate(payment.getPeriodEnd());
+            subscription.setStatus(SubscriptionStatus.ACTIVE);
+            subscriptionRepository.save(subscription);
+
+            paymentRepository.save(payment);
+
+            log.info("Payment verified and completed for transaction: {}, razorpayPaymentId: {}",
+                    payment.getTransactionId(), verifyRequest.getRazorpayPaymentId());
+
+            return convertToResponse(payment);
+
+        } catch (RazorpayException e) {
+            payment.setStatus(PaymentStatus.FAILED);
+            payment.setFailedAt(now);
+            payment.setFailureReason("Signature verification failed: " + e.getMessage());
+            paymentRepository.save(payment);
+            log.error("Payment verification failed for transaction: {}", payment.getTransactionId(), e);
+            throw new BadRequestException("Payment verification failed: " + e.getMessage());
+        }
     }
 
     @Transactional
-    public void retryPayment(Long paymentId) {
+    public void handleWebhook(String rawPayload, String razorpaySignature) {
+        try {
+            // Verify webhook signature
+            boolean isValid = Utils.verifyWebhookSignature(rawPayload, razorpaySignature, razorpayConfig.getWebhookSecret());
+
+            if (!isValid) {
+                log.warn("Invalid webhook signature received");
+                throw new BadRequestException("Invalid webhook signature");
+            }
+
+            JSONObject webhookPayload = new JSONObject(rawPayload);
+            String event = webhookPayload.getString("event");
+            JSONObject payloadData = webhookPayload.getJSONObject("payload");
+            JSONObject paymentEntity = payloadData.getJSONObject("payment").getJSONObject("entity");
+
+            String razorpayOrderId = paymentEntity.getString("order_id");
+            String razorpayPaymentId = paymentEntity.getString("id");
+
+            Payment payment = paymentRepository.findByRazorpayOrderId(razorpayOrderId)
+                    .orElse(null);
+
+            if (payment == null) {
+                log.warn("Payment not found for razorpayOrderId: {}", razorpayOrderId);
+                return;
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+            payment.setWebhookStatus(event);
+            payment.setWebhookReceivedAt(now);
+            payment.setWebhookPayload(rawPayload);
+            payment.setRazorpayPaymentId(razorpayPaymentId);
+
+            switch (event) {
+                case "payment.captured" -> {
+                    if (payment.getStatus() != PaymentStatus.SUCCESS) {
+                        payment.setStatus(PaymentStatus.SUCCESS);
+                        payment.setPaidAt(now);
+
+                        String method = paymentEntity.optString("method", null);
+                        payment.setPaymentMethod(method);
+
+                        // Update subscription
+                        Subscription subscription = payment.getSubscription();
+                        subscription.setIsPaid(true);
+                        subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
+                        subscription.setEndDate(payment.getPeriodEnd());
+                        subscription.setStatus(SubscriptionStatus.ACTIVE);
+                        subscriptionRepository.save(subscription);
+
+                        log.info("Payment captured via webhook for transaction: {}", payment.getTransactionId());
+                    }
+                }
+                case "payment.failed" -> {
+                    payment.setStatus(PaymentStatus.FAILED);
+                    payment.setFailedAt(now);
+
+                    JSONObject errorObj = paymentEntity.optJSONObject("error_description");
+                    String errorReason = errorObj != null ? errorObj.optString("description", "Payment failed") : "Payment failed";
+                    payment.setFailureReason(errorReason);
+
+                    log.warn("Payment failed via webhook for transaction: {}", payment.getTransactionId());
+                }
+                case "refund.created" -> {
+                    payment.setStatus(PaymentStatus.REFUNDED);
+                    payment.setRefundedAt(now);
+                    log.info("Payment refunded via webhook for transaction: {}", payment.getTransactionId());
+                }
+                default -> log.info("Received webhook event: {} for transaction: {}", event, payment.getTransactionId());
+            }
+
+            paymentRepository.save(payment);
+
+        } catch (RazorpayException e) {
+            log.error("Webhook signature verification failed", e);
+            throw new BadRequestException("Invalid webhook signature");
+        } catch (Exception e) {
+            log.error("Error processing webhook", e);
+            throw new BadRequestException("Error processing webhook: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public PaymentInitiateResponse retryPayment(Long paymentId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
 
@@ -195,11 +287,23 @@ public class PaymentService {
         payment.setStatus(PaymentStatus.PENDING);
 
         try {
-            String dodoPaymentId = createDodoPayment(payment);
-            payment.setDodoPaymentId(dodoPaymentId);
+            String razorpayOrderId = createRazorpayOrder(payment);
+            payment.setRazorpayOrderId(razorpayOrderId);
             paymentRepository.save(payment);
+
             log.info("Payment retry initiated for transaction: {}, attempt: {}",
                     payment.getTransactionId(), payment.getRetryCount());
+
+            return PaymentInitiateResponse.builder()
+                    .razorpayOrderId(razorpayOrderId)
+                    .razorpayKeyId(razorpayConfig.getKeyId())
+                    .amount(payment.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue())
+                    .currency(payment.getCurrency())
+                    .transactionId(payment.getTransactionId())
+                    .companyName(payment.getCompany().getName())
+                    .companyEmail(payment.getCompany().getEmail())
+                    .build();
+
         } catch (Exception e) {
             payment.setStatus(PaymentStatus.FAILED);
             payment.setFailureReason("Retry failed: " + e.getMessage());
@@ -208,44 +312,22 @@ public class PaymentService {
         }
     }
 
-    private String createDodoPayment(Payment payment) throws Exception {
-        String url = dodoPaymentConfig.getBaseUrl() + "/v1/payments";
+    private String createRazorpayOrder(Payment payment) throws RazorpayException {
+        JSONObject orderRequest = new JSONObject();
+        orderRequest.put("amount", payment.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue()); // Convert to paise
+        orderRequest.put("currency", payment.getCurrency());
+        orderRequest.put("receipt", payment.getTransactionId());
 
-        Map<String, Object> paymentData = new HashMap<>();
-        paymentData.put("amount", payment.getTotalAmount().multiply(BigDecimal.valueOf(100)).longValue()); // Convert to paise
-        paymentData.put("currency", payment.getCurrency());
-        paymentData.put("reference_id", payment.getTransactionId());
-        paymentData.put("idempotency_key", payment.getIdempotencyKey());
-        paymentData.put("description", "Subscription payment for " + payment.getCompany().getName());
-        paymentData.put("customer_email", payment.getCompany().getEmail());
-        paymentData.put("return_url", dodoPaymentConfig.getReturnUrl() + "?txn=" + payment.getTransactionId());
-        paymentData.put("cancel_url", dodoPaymentConfig.getCancelUrl() + "?txn=" + payment.getTransactionId());
+        // Add notes for tracking
+        JSONObject notes = new JSONObject();
+        notes.put("company_id", payment.getCompany().getId().toString());
+        notes.put("subscription_id", payment.getSubscription().getId().toString());
+        notes.put("billing_cycle", payment.getBillingCycle().toString());
+        notes.put("transaction_id", payment.getTransactionId());
+        orderRequest.put("notes", notes);
 
-        // Add metadata for tracking
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("company_id", payment.getCompany().getId().toString());
-        metadata.put("subscription_id", payment.getSubscription().getId().toString());
-        metadata.put("billing_cycle", payment.getBillingCycle().toString());
-        paymentData.put("metadata", metadata);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + dodoPaymentConfig.getApiKey());
-        headers.set("X-API-Secret", dodoPaymentConfig.getApiSecret());
-        headers.set("Idempotency-Key", payment.getIdempotencyKey());
-
-        HttpEntity<Map<String, Object>> request = new HttpEntity<>(paymentData, headers);
-
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-
-        if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
-            Map<String, Object> responseBody = response.getBody();
-            if (responseBody != null && responseBody.containsKey("payment_id")) {
-                return responseBody.get("payment_id").toString();
-            }
-        }
-
-        throw new Exception("Failed to create Dodo payment");
+        Order order = razorpayClient.orders.create(orderRequest);
+        return order.get("id");
     }
 
     private String getClientIp(HttpServletRequest request) {
@@ -263,7 +345,8 @@ public class PaymentService {
                 .id(payment.getId())
                 .subscriptionId(payment.getSubscription().getId())
                 .transactionId(payment.getTransactionId())
-                .dodoPaymentId(payment.getDodoPaymentId())
+                .razorpayOrderId(payment.getRazorpayOrderId())
+                .razorpayPaymentId(payment.getRazorpayPaymentId())
                 .amount(payment.getTotalAmount())
                 .currency(payment.getCurrency())
                 .status(payment.getStatus())

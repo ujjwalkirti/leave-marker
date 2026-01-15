@@ -11,6 +11,45 @@ import { toast } from 'sonner';
 import { Check, X, Loader2, ArrowLeft, Sparkles, Building2 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 
+// Razorpay type declarations
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  theme?: {
+    color?: string;
+  };
+  handler: (response: RazorpayResponse) => void;
+  modal?: {
+    ondismiss?: () => void;
+  };
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  close: () => void;
+}
+
 interface Plan {
   id: number;
   name: string;
@@ -135,8 +174,56 @@ export default function PricingPage() {
 
           if (paymentResponse.data.success) {
             const paymentData = paymentResponse.data.data;
-            // Redirect to Dodo payment page
-            window.location.href = paymentData.paymentUrl;
+
+            // Open Razorpay checkout
+            const options: RazorpayOptions = {
+              key: paymentData.razorpayKeyId,
+              amount: paymentData.amount,
+              currency: paymentData.currency,
+              name: 'LeaveMarker',
+              description: `${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} Subscription`,
+              order_id: paymentData.razorpayOrderId,
+              prefill: {
+                name: paymentData.companyName,
+                email: paymentData.companyEmail,
+              },
+              theme: {
+                color: '#6366f1',
+              },
+              handler: async (response: RazorpayResponse) => {
+                try {
+                  // Verify payment with backend
+                  const verifyResponse = await paymentAPI.verifyPayment({
+                    razorpayOrderId: response.razorpay_order_id,
+                    razorpayPaymentId: response.razorpay_payment_id,
+                    razorpaySignature: response.razorpay_signature,
+                  });
+
+                  if (verifyResponse.data.success) {
+                    toast.success('Payment successful!');
+                    router.push('/payment/success');
+                  } else {
+                    toast.error('Payment verification failed');
+                    router.push('/payment/cancel');
+                  }
+                } catch (error: any) {
+                  console.error('Payment verification error:', error);
+                  toast.error('Payment verification failed');
+                  router.push('/payment/cancel');
+                }
+              },
+              modal: {
+                ondismiss: () => {
+                  setSubscribing(false);
+                  setSelectedPlan(null);
+                  toast.info('Payment cancelled');
+                },
+              },
+            };
+
+            const razorpay = new window.Razorpay(options);
+            razorpay.open();
+            return; // Don't set subscribing to false yet, wait for modal dismiss
           }
         }
       }
@@ -144,8 +231,10 @@ export default function PricingPage() {
       console.error('Error subscribing:', error);
       toast.error(error.response?.data?.message || 'Failed to subscribe');
     } finally {
-      setSubscribing(false);
-      setSelectedPlan(null);
+      if (plan.tier === 'FREE') {
+        setSubscribing(false);
+        setSelectedPlan(null);
+      }
     }
   };
 
@@ -492,7 +581,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  We accept all major payment methods through Dodo Payments including credit cards, debit cards, UPI, and net banking.
+                  We accept all major payment methods through Razorpay including credit cards, debit cards, UPI, and net banking.
                 </p>
               </CardContent>
             </Card>

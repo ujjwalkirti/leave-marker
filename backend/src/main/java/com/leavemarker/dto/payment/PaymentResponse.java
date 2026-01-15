@@ -17,7 +17,8 @@ public class PaymentResponse {
     private Long id;
     private Long subscriptionId;
     private String transactionId;
-    private String dodoPaymentId;
+    private String razorpayOrderId;
+    private String razorpayPaymentId;
     private BigDecimal amount;
     private String currency;
     private PaymentStatus status;

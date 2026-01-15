@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/plans/active").permitAll()
                         .requestMatchers("/payments/webhook").permitAll()
+                        .requestMatchers("/contact").permitAll()
                         .anyRequest().authenticated()
                 );
 

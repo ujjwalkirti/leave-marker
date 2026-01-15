@@ -10,7 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentInitiateResponse {
-    private String paymentUrl;
+    private String razorpayOrderId;
+    private String razorpayKeyId;
+    private Long amount; // Amount in paise
+    private String currency;
     private String transactionId;
-    private String dodoPaymentId;
+    private String companyName;
+    private String companyEmail;
 }

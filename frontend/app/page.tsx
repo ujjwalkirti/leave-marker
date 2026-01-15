@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { ContactFormDialog } from '@/components/contact-form-dialog';
 import {
   Calendar,
   Clock,
@@ -311,13 +312,17 @@ export default function Home() {
               Start Free Trial
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-2 border-white text-white hover:bg-white/10 text-lg px-8"
-            >
-              Contact Sales
-            </Button>
+            <ContactFormDialog
+              trigger={
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-2 border-white text-white hover:bg-white/10 text-lg px-8"
+                >
+                  Request Demo
+                </Button>
+              }
+            />
           </div>
         </div>
       </section>
@@ -325,7 +330,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-900 text-muted-foreground py-12">
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center">
@@ -340,23 +345,28 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-white mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
+                {/* TODO: Add Features page
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
                     Features
                   </a>
                 </li>
+                */}
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="/pricing" className="hover:text-white transition-colors">
                     Pricing
                   </a>
                 </li>
+                {/* TODO: Add Security page
                 <li>
                   <a href="#" className="hover:text-white transition-colors">
                     Security
                   </a>
                 </li>
+                */}
               </ul>
             </div>
+            {/* TODO: Add Company pages (About, Blog, Careers)
             <div>
               <h4 className="font-semibold text-white mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
@@ -377,6 +387,8 @@ export default function Home() {
                 </li>
               </ul>
             </div>
+            */}
+            {/* TODO: Add Support pages (Help Center, Contact, Privacy)
             <div>
               <h4 className="font-semibold text-white mb-4">Support</h4>
               <ul className="space-y-2 text-sm">
@@ -397,6 +409,7 @@ export default function Home() {
                 </li>
               </ul>
             </div>
+            */}
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm text-muted-foreground">
             <p>&copy; 2026 LeaveMarker. All rights reserved.</p>
