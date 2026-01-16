@@ -2,17 +2,21 @@ package com.leavemarker.service;
 
 import com.leavemarker.config.RazorpayConfig;
 import com.leavemarker.dto.payment.*;
+import com.leavemarker.dto.subscription.SubscriptionRequest;
 import com.leavemarker.entity.Company;
 import com.leavemarker.entity.Payment;
+import com.leavemarker.entity.Plan;
 import com.leavemarker.entity.Subscription;
 import com.leavemarker.enums.BillingCycle;
 import com.leavemarker.enums.PaymentStatus;
 import com.leavemarker.enums.PaymentType;
+import com.leavemarker.enums.PlanTier;
 import com.leavemarker.enums.SubscriptionStatus;
 import com.leavemarker.exception.BadRequestException;
 import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.CompanyRepository;
 import com.leavemarker.repository.PaymentRepository;
+import com.leavemarker.repository.PlanRepository;
 import com.leavemarker.repository.SubscriptionRepository;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
@@ -39,8 +43,10 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final SubscriptionRepository subscriptionRepository;
     private final CompanyRepository companyRepository;
+    private final PlanRepository planRepository;
     private final RazorpayConfig razorpayConfig;
     private final RazorpayClient razorpayClient;
+    private final SubscriptionService subscriptionService;
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> getCompanyPayments(Long companyId) {
@@ -64,37 +70,53 @@ public class PaymentService {
         Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + companyId));
 
-        Subscription subscription = subscriptionRepository.findById(request.getSubscriptionId())
-                .orElseThrow(() -> new ResourceNotFoundException("Subscription not found with id: " + request.getSubscriptionId()));
+        Plan plan = planRepository.findById(request.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found with id: " + request.getPlanId()));
 
-        if (!subscription.getCompany().getId().equals(companyId)) {
-            throw new BadRequestException("Subscription does not belong to this company");
+        if (!plan.getActive()) {
+            throw new BadRequestException("Selected plan is not active");
         }
+
+        if (plan.getTier() == PlanTier.FREE) {
+            throw new BadRequestException("Free plan does not require payment");
+        }
+
+        // Check if company already has an active subscription to the same plan
+        subscriptionRepository.findByCompanyAndStatus(company, SubscriptionStatus.ACTIVE)
+                .ifPresent(existingSubscription -> {
+                    if (existingSubscription.getPlan().getId().equals(plan.getId())) {
+                        throw new BadRequestException("Company already has an active subscription to this plan");
+                    }
+                });
 
         // Generate unique IDs
         String transactionId = "TXN-" + UUID.randomUUID().toString();
         String idempotencyKey = "IDEM-" + UUID.randomUUID().toString();
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime periodEnd = subscription.getBillingCycle() == BillingCycle.YEARLY
+        LocalDateTime periodEnd = request.getBillingCycle() == BillingCycle.YEARLY
                 ? now.plusYears(1)
                 : now.plusMonths(1);
 
-        // Create payment record with full tracking
+        BigDecimal amount = request.getBillingCycle() == BillingCycle.YEARLY
+                ? plan.getYearlyPrice()
+                : plan.getMonthlyPrice();
+
+        // Create payment record WITHOUT subscription (subscription created after payment success)
         Payment payment = Payment.builder()
-                .subscription(subscription)
+                .plan(plan)
                 .company(company)
                 .transactionId(transactionId)
                 .paymentType(PaymentType.NEW_SUBSCRIPTION)
-                .billingCycle(subscription.getBillingCycle())
-                .amount(request.getAmount())
+                .billingCycle(request.getBillingCycle())
+                .amount(amount)
                 .taxAmount(BigDecimal.ZERO)
                 .discountAmount(BigDecimal.ZERO)
-                .totalAmount(request.getAmount())
+                .totalAmount(amount)
                 .currency("INR")
                 .status(PaymentStatus.PENDING)
                 .initiatedAt(now)
-                .periodStart(subscription.getCurrentPeriodStart())
+                .periodStart(now)
                 .periodEnd(periodEnd)
                 .idempotencyKey(idempotencyKey)
                 .ipAddress(getClientIp(httpRequest))
@@ -109,8 +131,8 @@ public class PaymentService {
             savedPayment.setRazorpayOrderId(razorpayOrderId);
             paymentRepository.save(savedPayment);
 
-            log.info("Payment initiated for company: {}, transaction: {}, razorpayOrderId: {}",
-                    companyId, transactionId, razorpayOrderId);
+            log.info("Payment initiated for company: {}, plan: {}, transaction: {}, razorpayOrderId: {}",
+                    companyId, plan.getName(), transactionId, razorpayOrderId);
 
             return PaymentInitiateResponse.builder()
                     .razorpayOrderId(razorpayOrderId)
@@ -162,17 +184,27 @@ public class PaymentService {
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(now);
 
-            // Update subscription
-            Subscription subscription = payment.getSubscription();
+            // Create subscription ONLY after successful payment verification
+            SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+            subscriptionRequest.setPlanId(payment.getPlan().getId());
+            subscriptionRequest.setBillingCycle(payment.getBillingCycle());
+            subscriptionRequest.setAutoRenew(true);
+
+            var subscriptionResponse = subscriptionService.createSubscription(
+                    payment.getCompany().getId(), subscriptionRequest);
+
+            // Link the subscription to the payment
+            Subscription subscription = subscriptionRepository.findById(subscriptionResponse.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
             subscription.setIsPaid(true);
             subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
             subscription.setEndDate(payment.getPeriodEnd());
-            subscription.setStatus(SubscriptionStatus.ACTIVE);
             subscriptionRepository.save(subscription);
 
+            payment.setSubscription(subscription);
             paymentRepository.save(payment);
 
-            log.info("Payment verified and completed for transaction: {}, razorpayPaymentId: {}",
+            log.info("Payment verified and subscription created for transaction: {}, razorpayPaymentId: {}",
                     payment.getTransactionId(), verifyRequest.getRazorpayPaymentId());
 
             return convertToResponse(payment);
@@ -229,13 +261,33 @@ public class PaymentService {
                         String method = paymentEntity.optString("method", null);
                         payment.setPaymentMethod(method);
 
-                        // Update subscription
-                        Subscription subscription = payment.getSubscription();
-                        subscription.setIsPaid(true);
-                        subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
-                        subscription.setEndDate(payment.getPeriodEnd());
-                        subscription.setStatus(SubscriptionStatus.ACTIVE);
-                        subscriptionRepository.save(subscription);
+                        // Create subscription if not exists (webhook came before verify call)
+                        if (payment.getSubscription() == null) {
+                            SubscriptionRequest subscriptionRequest = new SubscriptionRequest();
+                            subscriptionRequest.setPlanId(payment.getPlan().getId());
+                            subscriptionRequest.setBillingCycle(payment.getBillingCycle());
+                            subscriptionRequest.setAutoRenew(true);
+
+                            var subscriptionResponse = subscriptionService.createSubscription(
+                                    payment.getCompany().getId(), subscriptionRequest);
+
+                            Subscription subscription = subscriptionRepository.findById(subscriptionResponse.getId())
+                                    .orElseThrow(() -> new ResourceNotFoundException("Subscription not found"));
+                            subscription.setIsPaid(true);
+                            subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
+                            subscription.setEndDate(payment.getPeriodEnd());
+                            subscriptionRepository.save(subscription);
+
+                            payment.setSubscription(subscription);
+                        } else {
+                            // Update existing subscription
+                            Subscription subscription = payment.getSubscription();
+                            subscription.setIsPaid(true);
+                            subscription.setCurrentPeriodEnd(payment.getPeriodEnd());
+                            subscription.setEndDate(payment.getPeriodEnd());
+                            subscription.setStatus(SubscriptionStatus.ACTIVE);
+                            subscriptionRepository.save(subscription);
+                        }
 
                         log.info("Payment captured via webhook for transaction: {}", payment.getTransactionId());
                     }
@@ -321,7 +373,7 @@ public class PaymentService {
         // Add notes for tracking
         JSONObject notes = new JSONObject();
         notes.put("company_id", payment.getCompany().getId().toString());
-        notes.put("subscription_id", payment.getSubscription().getId().toString());
+        notes.put("plan_id", payment.getPlan().getId().toString());
         notes.put("billing_cycle", payment.getBillingCycle().toString());
         notes.put("transaction_id", payment.getTransactionId());
         orderRequest.put("notes", notes);
@@ -343,7 +395,7 @@ public class PaymentService {
     private PaymentResponse convertToResponse(Payment payment) {
         return PaymentResponse.builder()
                 .id(payment.getId())
-                .subscriptionId(payment.getSubscription().getId())
+                .subscriptionId(payment.getSubscription() != null ? payment.getSubscription().getId() : null)
                 .transactionId(payment.getTransactionId())
                 .razorpayOrderId(payment.getRazorpayOrderId())
                 .razorpayPaymentId(payment.getRazorpayPaymentId())

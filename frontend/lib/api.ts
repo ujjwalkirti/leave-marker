@@ -227,7 +227,7 @@ export const subscriptionAPI = {
 export const paymentAPI = {
   getCompanyPayments: () => api.get('/payments'),
   getPaymentById: (id: number) => api.get(`/payments/${id}`),
-  initiatePayment: (data: { subscriptionId: number; amount: number }) =>
+  initiatePayment: (data: { planId: number; billingCycle: 'MONTHLY' | 'YEARLY' }) =>
     api.post('/payments/initiate', data),
   verifyPayment: (data: {
     razorpayOrderId: string;

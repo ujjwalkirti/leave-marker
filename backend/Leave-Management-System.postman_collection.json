@@ -1398,7 +1398,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Free Plan\",\n  \"description\": \"Perfect for small teams just getting started\",\n  \"tier\": \"FREE\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 0,\n  \"yearlyPrice\": 0,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 10,\n  \"maxLeavePolicies\": 1,\n  \"maxHolidays\": 6,\n  \"active\": true,\n  \"attendanceManagement\": false,\n  \"reportsDownload\": false,\n  \"multipleLeavePolicies\": false,\n  \"unlimitedHolidays\": false,\n  \"attendanceRateAnalytics\": false,\n  \"reportDownloadPriceUnder50\": 0,\n  \"reportDownloadPrice50Plus\": 0\n}"
+							"raw": "{\n  \"name\": \"Free Plan\",\n  \"description\": \"Perfect for small teams just getting started\",\n  \"tier\": \"FREE\",\n  \"planType\": \"FREE\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 0,\n  \"yearlyPrice\": 0,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 10,\n  \"maxLeavePolicies\": 1,\n  \"maxHolidays\": 6,\n  \"active\": true,\n  \"attendanceManagement\": false,\n  \"reportsDownload\": false,\n  \"multipleLeavePolicies\": false,\n  \"unlimitedHolidays\": false,\n  \"attendanceRateAnalytics\": false,\n  \"advancedReports\": false,\n  \"customLeaveTypes\": false,\n  \"apiAccess\": false,\n  \"prioritySupport\": false,\n  \"pricePerEmployee\": 0,\n  \"reportDownloadPriceUnder50\": 0,\n  \"reportDownloadPrice50Plus\": 0\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/plans",
@@ -1440,7 +1440,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"name\": \"Mid-Tier Plan\",\n  \"description\": \"Comprehensive HR management for growing companies\",\n  \"tier\": \"MID_TIER\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 100,\n  \"yearlyPrice\": 1000,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 999999,\n  \"maxLeavePolicies\": 999,\n  \"maxHolidays\": -1,\n  \"active\": true,\n  \"attendanceManagement\": true,\n  \"reportsDownload\": true,\n  \"multipleLeavePolicies\": true,\n  \"unlimitedHolidays\": true,\n  \"attendanceRateAnalytics\": true,\n  \"reportDownloadPriceUnder50\": 200,\n  \"reportDownloadPrice50Plus\": 400\n}"
+							"raw": "{\n  \"name\": \"Mid-Tier Plan\",\n  \"description\": \"Comprehensive HR management for growing companies\",\n  \"tier\": \"MID_TIER\",\n  \"planType\": \"PAID\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 100,\n  \"yearlyPrice\": 1000,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 999999,\n  \"maxLeavePolicies\": -1,\n  \"maxHolidays\": -1,\n  \"active\": true,\n  \"attendanceManagement\": true,\n  \"reportsDownload\": true,\n  \"multipleLeavePolicies\": true,\n  \"unlimitedHolidays\": true,\n  \"attendanceRateAnalytics\": true,\n  \"advancedReports\": true,\n  \"customLeaveTypes\": true,\n  \"apiAccess\": true,\n  \"prioritySupport\": true,\n  \"pricePerEmployee\": 100,\n  \"reportDownloadPriceUnder50\": 200,\n  \"reportDownloadPrice50Plus\": 400\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/plans",

@@ -78,15 +78,22 @@ public class SubscriptionService {
             throw new BadRequestException("Selected plan is not active");
         }
 
-        // Cancel existing active subscription if any
-        subscriptionRepository.findByCompanyAndStatus(company, SubscriptionStatus.ACTIVE)
-                .ifPresent(existingSubscription -> {
-                    existingSubscription.setStatus(SubscriptionStatus.CANCELLED);
-                    existingSubscription.setCancelledAt(LocalDateTime.now());
-                    existingSubscription.setCancellationReason("Upgraded/changed to new plan");
-                    subscriptionRepository.save(existingSubscription);
-                    log.info("Cancelled existing subscription for company: {}", companyId);
-                });
+        // Check if company already has an active subscription to the same plan
+        Optional<Subscription> existingSubscriptionOpt = subscriptionRepository
+                .findByCompanyAndStatus(company, SubscriptionStatus.ACTIVE);
+
+        if (existingSubscriptionOpt.isPresent()) {
+            Subscription existingSubscription = existingSubscriptionOpt.get();
+            if (existingSubscription.getPlan().getId().equals(plan.getId())) {
+                throw new BadRequestException("Company already has an active subscription to this plan");
+            }
+            // Cancel existing subscription if switching to a different plan
+            existingSubscription.setStatus(SubscriptionStatus.CANCELLED);
+            existingSubscription.setCancelledAt(LocalDateTime.now());
+            existingSubscription.setCancellationReason("Upgraded/changed to new plan");
+            subscriptionRepository.save(existingSubscription);
+            log.info("Cancelled existing subscription for company: {}", companyId);
+        }
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime periodEnd = request.getBillingCycle() == BillingCycle.YEARLY
@@ -213,6 +220,7 @@ public class SubscriptionService {
                 .name(plan.getName())
                 .description(plan.getDescription())
                 .tier(plan.getTier())
+                .planType(plan.getPlanType())
                 .billingCycle(plan.getBillingCycle())
                 .monthlyPrice(plan.getMonthlyPrice())
                 .yearlyPrice(plan.getYearlyPrice())
@@ -226,6 +234,11 @@ public class SubscriptionService {
                 .multipleLeavePolicies(plan.getMultipleLeavePolicies())
                 .unlimitedHolidays(plan.getUnlimitedHolidays())
                 .attendanceRateAnalytics(plan.getAttendanceRateAnalytics())
+                .advancedReports(plan.getAdvancedReports())
+                .customLeaveTypes(plan.getCustomLeaveTypes())
+                .apiAccess(plan.getApiAccess())
+                .prioritySupport(plan.getPrioritySupport())
+                .pricePerEmployee(plan.getPricePerEmployee())
                 .reportDownloadPriceUnder50(plan.getReportDownloadPriceUnder50())
                 .reportDownloadPrice50Plus(plan.getReportDownloadPrice50Plus())
                 .build();

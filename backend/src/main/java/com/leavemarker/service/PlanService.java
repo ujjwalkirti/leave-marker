@@ -4,6 +4,7 @@ import com.leavemarker.dto.plan.PlanRequest;
 import com.leavemarker.dto.plan.PlanResponse;
 import com.leavemarker.entity.Plan;
 import com.leavemarker.enums.PlanTier;
+import com.leavemarker.enums.PlanType;
 import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,7 @@ public class PlanService {
                 .name(request.getName())
                 .description(request.getDescription())
                 .tier(request.getTier())
+                .planType(request.getPlanType() != null ? request.getPlanType() : PlanType.FREE)
                 .billingCycle(request.getBillingCycle())
                 .monthlyPrice(request.getMonthlyPrice())
                 .yearlyPrice(request.getYearlyPrice())
@@ -71,6 +73,11 @@ public class PlanService {
                 .multipleLeavePolicies(request.getMultipleLeavePolicies() != null ? request.getMultipleLeavePolicies() : false)
                 .unlimitedHolidays(request.getUnlimitedHolidays() != null ? request.getUnlimitedHolidays() : false)
                 .attendanceRateAnalytics(request.getAttendanceRateAnalytics() != null ? request.getAttendanceRateAnalytics() : false)
+                .advancedReports(request.getAdvancedReports() != null ? request.getAdvancedReports() : false)
+                .customLeaveTypes(request.getCustomLeaveTypes() != null ? request.getCustomLeaveTypes() : false)
+                .apiAccess(request.getApiAccess() != null ? request.getApiAccess() : false)
+                .prioritySupport(request.getPrioritySupport() != null ? request.getPrioritySupport() : false)
+                .pricePerEmployee(request.getPricePerEmployee() != null ? request.getPricePerEmployee() : java.math.BigDecimal.ZERO)
                 .reportDownloadPriceUnder50(request.getReportDownloadPriceUnder50() != null ? request.getReportDownloadPriceUnder50() : java.math.BigDecimal.ZERO)
                 .reportDownloadPrice50Plus(request.getReportDownloadPrice50Plus() != null ? request.getReportDownloadPrice50Plus() : java.math.BigDecimal.ZERO)
                 .build();
@@ -88,6 +95,7 @@ public class PlanService {
         plan.setName(request.getName());
         plan.setDescription(request.getDescription());
         plan.setTier(request.getTier());
+        plan.setPlanType(request.getPlanType() != null ? request.getPlanType() : PlanType.FREE);
         plan.setBillingCycle(request.getBillingCycle());
         plan.setMonthlyPrice(request.getMonthlyPrice());
         plan.setYearlyPrice(request.getYearlyPrice());
@@ -101,6 +109,11 @@ public class PlanService {
         plan.setMultipleLeavePolicies(request.getMultipleLeavePolicies() != null ? request.getMultipleLeavePolicies() : false);
         plan.setUnlimitedHolidays(request.getUnlimitedHolidays() != null ? request.getUnlimitedHolidays() : false);
         plan.setAttendanceRateAnalytics(request.getAttendanceRateAnalytics() != null ? request.getAttendanceRateAnalytics() : false);
+        plan.setAdvancedReports(request.getAdvancedReports() != null ? request.getAdvancedReports() : false);
+        plan.setCustomLeaveTypes(request.getCustomLeaveTypes() != null ? request.getCustomLeaveTypes() : false);
+        plan.setApiAccess(request.getApiAccess() != null ? request.getApiAccess() : false);
+        plan.setPrioritySupport(request.getPrioritySupport() != null ? request.getPrioritySupport() : false);
+        plan.setPricePerEmployee(request.getPricePerEmployee() != null ? request.getPricePerEmployee() : java.math.BigDecimal.ZERO);
         plan.setReportDownloadPriceUnder50(request.getReportDownloadPriceUnder50() != null ? request.getReportDownloadPriceUnder50() : java.math.BigDecimal.ZERO);
         plan.setReportDownloadPrice50Plus(request.getReportDownloadPrice50Plus() != null ? request.getReportDownloadPrice50Plus() : java.math.BigDecimal.ZERO);
 
@@ -124,6 +137,7 @@ public class PlanService {
                 .name(plan.getName())
                 .description(plan.getDescription())
                 .tier(plan.getTier())
+                .planType(plan.getPlanType())
                 .billingCycle(plan.getBillingCycle())
                 .monthlyPrice(plan.getMonthlyPrice())
                 .yearlyPrice(plan.getYearlyPrice())
@@ -137,6 +151,11 @@ public class PlanService {
                 .multipleLeavePolicies(plan.getMultipleLeavePolicies())
                 .unlimitedHolidays(plan.getUnlimitedHolidays())
                 .attendanceRateAnalytics(plan.getAttendanceRateAnalytics())
+                .advancedReports(plan.getAdvancedReports())
+                .customLeaveTypes(plan.getCustomLeaveTypes())
+                .apiAccess(plan.getApiAccess())
+                .prioritySupport(plan.getPrioritySupport())
+                .pricePerEmployee(plan.getPricePerEmployee())
                 .reportDownloadPriceUnder50(plan.getReportDownloadPriceUnder50())
                 .reportDownloadPrice50Plus(plan.getReportDownloadPrice50Plus())
                 .build();

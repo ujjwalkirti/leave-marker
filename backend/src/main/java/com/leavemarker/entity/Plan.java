@@ -2,6 +2,7 @@ package com.leavemarker.entity;
 
 import com.leavemarker.enums.BillingCycle;
 import com.leavemarker.enums.PlanTier;
+import com.leavemarker.enums.PlanType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,6 +26,11 @@ public class Plan extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlanTier tier;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private PlanType planType = PlanType.FREE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -82,6 +88,27 @@ public class Plan extends BaseEntity {
     @Column(nullable = false)
     @Builder.Default
     private Boolean attendanceRateAnalytics = false; // MID_TIER only
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean advancedReports = false; // MID_TIER only
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean customLeaveTypes = false; // MID_TIER only
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean apiAccess = false; // MID_TIER only
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean prioritySupport = false; // MID_TIER only
+
+    // Pricing per employee
+    @Column(nullable = false, precision = 10, scale = 2)
+    @Builder.Default
+    private BigDecimal pricePerEmployee = BigDecimal.ZERO;
 
     // Report download pricing (add-on for MID_TIER)
     @Column(precision = 10, scale = 2)

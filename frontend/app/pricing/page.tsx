@@ -151,80 +151,77 @@ export default function PricingPage() {
     setSubscribing(true);
 
     try {
-      // Create subscription
-      const subResponse = await subscriptionAPI.createSubscription({
-        planId: plan.id,
-        billingCycle: isYearly ? 'YEARLY' : 'MONTHLY',
-        autoRenew: true,
-      });
+      if (plan.tier === 'FREE') {
+        // For free plan, create subscription directly (no payment needed)
+        const subResponse = await subscriptionAPI.createSubscription({
+          planId: plan.id,
+          billingCycle: isYearly ? 'YEARLY' : 'MONTHLY',
+          autoRenew: true,
+        });
 
-      if (subResponse.data.success) {
-        const subscription = subResponse.data.data;
-
-        if (plan.tier === 'FREE') {
+        if (subResponse.data.success) {
           toast.success('Successfully subscribed to Free plan!');
           router.push('/dashboard');
-        } else {
-          // Initiate payment for paid plan
-          const amount = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
-          const paymentResponse = await paymentAPI.initiatePayment({
-            subscriptionId: subscription.id,
-            amount: amount,
-          });
+        }
+      } else {
+        // For paid plans, initiate payment first (subscription created after payment success)
+        const paymentResponse = await paymentAPI.initiatePayment({
+          planId: plan.id,
+          billingCycle: isYearly ? 'YEARLY' : 'MONTHLY',
+        });
 
-          if (paymentResponse.data.success) {
-            const paymentData = paymentResponse.data.data;
+        if (paymentResponse.data.success) {
+          const paymentData = paymentResponse.data.data;
 
-            // Open Razorpay checkout
-            const options: RazorpayOptions = {
-              key: paymentData.razorpayKeyId,
-              amount: paymentData.amount,
-              currency: paymentData.currency,
-              name: 'LeaveMarker',
-              description: `${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} Subscription`,
-              order_id: paymentData.razorpayOrderId,
-              prefill: {
-                name: paymentData.companyName,
-                email: paymentData.companyEmail,
-              },
-              theme: {
-                color: '#6366f1',
-              },
-              handler: async (response: RazorpayResponse) => {
-                try {
-                  // Verify payment with backend
-                  const verifyResponse = await paymentAPI.verifyPayment({
-                    razorpayOrderId: response.razorpay_order_id,
-                    razorpayPaymentId: response.razorpay_payment_id,
-                    razorpaySignature: response.razorpay_signature,
-                  });
+          // Open Razorpay checkout
+          const options: RazorpayOptions = {
+            key: paymentData.razorpayKeyId,
+            amount: paymentData.amount,
+            currency: paymentData.currency,
+            name: 'LeaveMarker',
+            description: `${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} Subscription`,
+            order_id: paymentData.razorpayOrderId,
+            prefill: {
+              name: paymentData.companyName,
+              email: paymentData.companyEmail,
+            },
+            theme: {
+              color: '#6366f1',
+            },
+            handler: async (response: RazorpayResponse) => {
+              try {
+                // Verify payment with backend (subscription is created here)
+                const verifyResponse = await paymentAPI.verifyPayment({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                });
 
-                  if (verifyResponse.data.success) {
-                    toast.success('Payment successful!');
-                    router.push('/payment/success');
-                  } else {
-                    toast.error('Payment verification failed');
-                    router.push('/payment/cancel');
-                  }
-                } catch (error: any) {
-                  console.error('Payment verification error:', error);
+                if (verifyResponse.data.success) {
+                  toast.success('Payment successful! Subscription activated.');
+                  router.push('/payment/success');
+                } else {
                   toast.error('Payment verification failed');
                   router.push('/payment/cancel');
                 }
+              } catch (error: any) {
+                console.error('Payment verification error:', error);
+                toast.error('Payment verification failed');
+                router.push('/payment/cancel');
+              }
+            },
+            modal: {
+              ondismiss: () => {
+                setSubscribing(false);
+                setSelectedPlan(null);
+                toast.info('Payment cancelled');
               },
-              modal: {
-                ondismiss: () => {
-                  setSubscribing(false);
-                  setSelectedPlan(null);
-                  toast.info('Payment cancelled');
-                },
-              },
-            };
+            },
+          };
 
-            const razorpay = new window.Razorpay(options);
-            razorpay.open();
-            return; // Don't set subscribing to false yet, wait for modal dismiss
-          }
+          const razorpay = new window.Razorpay(options);
+          razorpay.open();
+          return; // Don't set subscribing to false yet, wait for modal dismiss
         }
       }
     } catch (error: any) {
