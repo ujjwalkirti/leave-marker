@@ -36,8 +36,8 @@ public class EmployeeService {
         // Check subscription plan limits
         subscriptionFeatureService.validateCanAddEmployee(company.getId());
 
-        if (employeeRepository.existsByCompanyIdAndEmailAndDeletedFalse(company.getId(), request.getEmail())) {
-            throw new BadRequestException("Employee with this email already exists");
+        if (employeeRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
+            throw new BadRequestException("An account with this email already exists");
         }
 
         if (employeeRepository.existsByCompanyIdAndEmployeeIdAndDeletedFalse(company.getId(), request.getEmployeeId())) {
@@ -109,9 +109,8 @@ public class EmployeeService {
             employee.setFullName(request.getFullName());
         }
         if (request.getEmail() != null && !request.getEmail().equals(employee.getEmail())) {
-            if (employeeRepository.existsByCompanyIdAndEmailAndDeletedFalse(
-                    currentUser.getCompanyId(), request.getEmail())) {
-                throw new BadRequestException("Employee with this email already exists");
+            if (employeeRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
+                throw new BadRequestException("An account with this email already exists");
             }
             employee.setEmail(request.getEmail());
         }
@@ -155,7 +154,20 @@ public class EmployeeService {
             throw new BadRequestException("Access denied");
         }
 
-        employee.setDeleted(true);
+        employee.setStatus(EmployeeStatus.INACTIVE);
+        employeeRepository.save(employee);
+    }
+
+    @Transactional
+    public void reactivateEmployee(Long id, UserPrincipal currentUser) {
+        Employee employee = employeeRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        if (!employee.getCompany().getId().equals(currentUser.getCompanyId())) {
+            throw new BadRequestException("Access denied");
+        }
+
+        employee.setStatus(EmployeeStatus.ACTIVE);
         employeeRepository.save(employee);
     }
 

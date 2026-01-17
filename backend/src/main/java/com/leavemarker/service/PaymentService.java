@@ -15,6 +15,7 @@ import com.leavemarker.enums.SubscriptionStatus;
 import com.leavemarker.exception.BadRequestException;
 import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.CompanyRepository;
+import com.leavemarker.repository.EmployeeRepository;
 import com.leavemarker.repository.PaymentRepository;
 import com.leavemarker.repository.PlanRepository;
 import com.leavemarker.repository.SubscriptionRepository;
@@ -44,6 +45,7 @@ public class PaymentService {
     private final SubscriptionRepository subscriptionRepository;
     private final CompanyRepository companyRepository;
     private final PlanRepository planRepository;
+    private final EmployeeRepository employeeRepository;
     private final RazorpayConfig razorpayConfig;
     private final RazorpayClient razorpayClient;
     private final SubscriptionService subscriptionService;
@@ -98,9 +100,16 @@ public class PaymentService {
                 ? now.plusYears(1)
                 : now.plusMonths(1);
 
-        BigDecimal amount = request.getBillingCycle() == BillingCycle.YEARLY
+        // Calculate amount based on per-employee pricing
+        long employeeCount = employeeRepository.countByCompanyIdAndDeletedFalse(companyId);
+        if (employeeCount == 0) {
+            employeeCount = 1; // Minimum 1 employee for pricing
+        }
+
+        BigDecimal pricePerEmployee = request.getBillingCycle() == BillingCycle.YEARLY
                 ? plan.getYearlyPrice()
                 : plan.getMonthlyPrice();
+        BigDecimal amount = pricePerEmployee.multiply(BigDecimal.valueOf(employeeCount));
 
         // Create payment record WITHOUT subscription (subscription created after payment success)
         Payment payment = Payment.builder()
@@ -142,6 +151,8 @@ public class PaymentService {
                     .transactionId(transactionId)
                     .companyName(company.getName())
                     .companyEmail(company.getEmail())
+                    .employeeCount(employeeCount)
+                    .pricePerEmployee(pricePerEmployee.multiply(BigDecimal.valueOf(100)).longValue())
                     .build();
 
         } catch (Exception e) {

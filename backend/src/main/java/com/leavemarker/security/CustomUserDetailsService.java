@@ -1,6 +1,7 @@
 package com.leavemarker.security;
 
 import com.leavemarker.entity.Employee;
+import com.leavemarker.enums.EmployeeStatus;
 import com.leavemarker.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,8 +19,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Employee employee = employeeRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        Employee employee = employeeRepository.findByEmailAndStatusAndDeletedFalse(email, EmployeeStatus.ACTIVE)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found or account is inactive"));
 
         return UserPrincipal.create(employee);
     }

@@ -15,6 +15,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     Optional<Employee> findByEmailAndDeletedFalse(String email);
 
+    Optional<Employee> findByEmailAndStatusAndDeletedFalse(String email, EmployeeStatus status);
+
     Optional<Employee> findByIdAndDeletedFalse(Long id);
 
     Optional<Employee> findByPasswordResetTokenAndDeletedFalse(String token);
@@ -26,6 +28,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
     List<Employee> findByManagerIdAndDeletedFalse(Long managerId);
 
     boolean existsByCompanyIdAndEmailAndDeletedFalse(Long companyId, String email);
+
+    boolean existsByEmailAndDeletedFalse(String email);
 
     boolean existsByCompanyIdAndEmployeeIdAndDeletedFalse(Long companyId, String employeeId);
 

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { planAPI, subscriptionAPI, paymentAPI } from '@/lib/api';
 import { toast } from 'sonner';
 import { Check, X, Loader2, ArrowLeft, Sparkles, Building2 } from 'lucide-react';
@@ -179,7 +180,7 @@ export default function PricingPage() {
             amount: paymentData.amount,
             currency: paymentData.currency,
             name: 'LeaveMarker',
-            description: `${plan.name} - ${isYearly ? 'Yearly' : 'Monthly'} Subscription`,
+            description: `${plan.name} - ${paymentData.employeeCount} employee${paymentData.employeeCount > 1 ? 's' : ''} × ₹${(paymentData.pricePerEmployee / 100).toLocaleString('en-IN')}/${isYearly ? 'year' : 'month'}`,
             order_id: paymentData.razorpayOrderId,
             prefill: {
               name: paymentData.companyName,
@@ -260,11 +261,11 @@ export default function PricingPage() {
   const getTierStyles = (tier: string) => {
     switch (tier) {
       case 'FREE':
-        return 'border-gray-200';
+        return 'border-border';
       case 'MID_TIER':
-        return 'border-indigo-600 border-2 shadow-xl';
+        return 'border-primary border-2 shadow-xl';
       default:
-        return 'border-gray-200';
+        return 'border-border';
     }
   };
 
@@ -277,57 +278,9 @@ export default function PricingPage() {
   }, {} as Record<string, Plan>);
 
   const tierOrder: ('FREE' | 'MID_TIER')[] = ['FREE', 'MID_TIER'];
-  let orderedPlans = tierOrder
+  const orderedPlans = tierOrder
     .map(tier => plansByTier[tier])
     .filter(Boolean);
-
-  // Fallback to hardcoded plans if no plans exist in database
-  if (orderedPlans.length === 0) {
-    orderedPlans = [
-      {
-        id: 1,
-        name: 'Free Plan',
-        description: 'Perfect for small teams just getting started',
-        tier: 'FREE' as const,
-        billingCycle: 'MONTHLY' as const,
-        monthlyPrice: 0,
-        yearlyPrice: 0,
-        minEmployees: 1,
-        maxEmployees: 10,
-        maxLeavePolicies: 1,
-        maxHolidays: 6,
-        active: true,
-        attendanceManagement: false,
-        reportsDownload: false,
-        multipleLeavePolicies: false,
-        unlimitedHolidays: false,
-        attendanceRateAnalytics: false,
-        reportDownloadPriceUnder50: 0,
-        reportDownloadPrice50Plus: 0,
-      },
-      {
-        id: 2,
-        name: 'Mid-Tier Plan',
-        description: 'Comprehensive HR management for growing companies',
-        tier: 'MID_TIER' as const,
-        billingCycle: 'MONTHLY' as const,
-        monthlyPrice: 100,
-        yearlyPrice: 1000,
-        minEmployees: 1,
-        maxEmployees: 999999,
-        maxLeavePolicies: 999,
-        maxHolidays: -1,
-        active: true,
-        attendanceManagement: true,
-        reportsDownload: true,
-        multipleLeavePolicies: true,
-        unlimitedHolidays: true,
-        attendanceRateAnalytics: true,
-        reportDownloadPriceUnder50: 200,
-        reportDownloadPrice50Plus: 400,
-      },
-    ];
-  }
 
   if (loading) {
     return (
@@ -379,6 +332,12 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
+        {orderedPlans.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-xl text-muted-foreground">No pricing plans available at the moment.</p>
+            <p className="text-sm text-muted-foreground mt-2">Please check back later or contact support.</p>
+          </div>
+        ) : (
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {orderedPlans.map((plan) => {
             const isCurrentPlan = currentFeatures?.tier === plan.tier;
@@ -387,22 +346,22 @@ export default function PricingPage() {
             return (
               <Card
                 key={plan.id}
-                className={`relative ${getTierStyles(plan.tier)} ${
-                  isCurrentPlan ? 'ring-2 ring-indigo-500' : ''
+                className={`relative flex flex-col h-full ${getTierStyles(plan.tier)} ${
+                  isCurrentPlan ? 'ring-2 ring-primary' : ''
                 }`}
               >
-                {plan.tier === 'MID_TIER' && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-                {isCurrentPlan && (
-                  <div className="absolute -top-4 right-4">
-                    <span className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      Current Plan
-                    </span>
+                {(plan.tier === 'MID_TIER' || isCurrentPlan) && (
+                  <div className="absolute -top-3 right-4 flex gap-2">
+                    {plan.tier === 'MID_TIER' && (
+                      <Badge variant="default" className="px-3 py-1 text-xs shadow-sm">
+                        Most Popular
+                      </Badge>
+                    )}
+                    {isCurrentPlan && (
+                      <Badge variant="secondary" className="px-3 py-1 text-xs shadow-sm">
+                        Current Plan
+                      </Badge>
+                    )}
                   </div>
                 )}
                 <CardHeader>
@@ -439,7 +398,7 @@ export default function PricingPage() {
                     )}
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="flex flex-col grow space-y-6">
                   <div className="space-y-3">
                     {/* Employee Limits */}
                     <Feature
@@ -491,7 +450,7 @@ export default function PricingPage() {
                   )}
 
                   <Button
-                    className="w-full"
+                    className="w-full mt-auto"
                     variant={plan.tier === 'MID_TIER' ? 'default' : 'outline'}
                     size="lg"
                     onClick={() => handleSubscribe(plan)}
@@ -515,6 +474,7 @@ export default function PricingPage() {
             );
           })}
         </div>
+        )}
 
         {/* FAQ Section */}
         <div className="mt-20 max-w-3xl mx-auto">

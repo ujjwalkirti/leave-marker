@@ -44,7 +44,7 @@ public class SubscriptionFeatureService {
         if (subscriptionOpt.isEmpty()) {
             // Return default FREE tier limits
             return SubscriptionInfo.builder()
-                    .hasActiveSubscription(false)
+                    .activeSubscription(false)
                     .tier(PlanTier.FREE)
                     .maxEmployees(10)
                     .maxLeavePolicies(1)
@@ -61,13 +61,13 @@ public class SubscriptionFeatureService {
         Plan plan = subscription.getPlan();
 
         // Check if subscription is within valid period
-        boolean isValid = LocalDateTime.now().isBefore(subscription.getCurrentPeriodEnd());
+        boolean isValidPeriod = LocalDateTime.now().isBefore(subscription.getCurrentPeriodEnd());
 
         return SubscriptionInfo.builder()
-                .hasActiveSubscription(true)
+                .activeSubscription(true)
                 .subscriptionId(subscription.getId())
-                .isPaid(subscription.getIsPaid())
-                .isValid(isValid)
+                .paid(subscription.getIsPaid())
+                .valid(isValidPeriod)
                 .tier(plan.getTier())
                 .planName(plan.getName())
                 .maxEmployees(plan.getMaxEmployees())
@@ -178,7 +178,7 @@ public class SubscriptionFeatureService {
         int currentPolicies = (int) leavePolicyRepository.countByCompanyIdAndDeletedFalse(companyId);
 
         return SubscriptionFeatureResponse.builder()
-                .hasActiveSubscription(info.isHasActiveSubscription())
+                .hasActiveSubscription(info.isActiveSubscription())
                 .subscriptionId(info.getSubscriptionId())
                 .isPaid(info.isPaid())
                 .isValid(info.isValid())
@@ -203,20 +203,20 @@ public class SubscriptionFeatureService {
     @lombok.Builder
     @lombok.Getter
     public static class SubscriptionInfo {
-        private boolean hasActiveSubscription;
-        private Long subscriptionId;
-        private boolean isPaid;
-        private boolean isValid;
-        private PlanTier tier;
-        private String planName;
-        private int maxEmployees;
-        private int maxLeavePolicies;
-        private int maxHolidays;
-        private boolean attendanceManagement;
-        private boolean reportsDownload;
-        private boolean multipleLeavePolicies;
-        private boolean unlimitedHolidays;
-        private boolean attendanceRateAnalytics;
-        private LocalDateTime currentPeriodEnd;
+        private final boolean activeSubscription;
+        private final Long subscriptionId;
+        private final boolean paid;
+        private final boolean valid;
+        private final PlanTier tier;
+        private final String planName;
+        private final int maxEmployees;
+        private final int maxLeavePolicies;
+        private final int maxHolidays;
+        private final boolean attendanceManagement;
+        private final boolean reportsDownload;
+        private final boolean multipleLeavePolicies;
+        private final boolean unlimitedHolidays;
+        private final boolean attendanceRateAnalytics;
+        private final LocalDateTime currentPeriodEnd;
     }
 }

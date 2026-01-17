@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Table(name = "employees",
        uniqueConstraints = {
            @UniqueConstraint(columnNames = {"company_id", "employee_id"}),
-           @UniqueConstraint(columnNames = {"company_id", "email"})
+           @UniqueConstraint(columnNames = {"email"})
        })
 @Getter
 @Setter

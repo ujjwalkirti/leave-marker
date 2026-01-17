@@ -87,4 +87,13 @@ public class EmployeeController {
         employeeService.deactivateEmployee(id, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Employee deactivated successfully"));
     }
+
+    @PutMapping("/{id}/reactivate")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'HR_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> reactivateEmployee(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        employeeService.reactivateEmployee(id, currentUser);
+        return ResponseEntity.ok(ApiResponse.success("Employee reactivated successfully"));
+    }
 }

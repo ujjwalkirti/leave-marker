@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -33,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { leavePolicyAPI, leaveBalanceAPI } from '@/lib/api';
 import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/utils';
 import { Loader2, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/lib/auth-context';
@@ -90,8 +90,8 @@ export default function LeavePoliciesPage() {
       if (response.data.success) {
         setPolicies(response.data.data);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to fetch policies');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to fetch policies'));
     } finally {
       setLoading(false);
     }
@@ -112,8 +112,8 @@ export default function LeavePoliciesPage() {
       setDialogOpen(false);
       resetForm();
       await fetchPolicies();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -141,8 +141,8 @@ export default function LeavePoliciesPage() {
       await leavePolicyAPI.deletePolicy(id);
       toast.success('Leave policy deleted successfully!');
       await fetchPolicies();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to delete policy');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to delete policy'));
     }
   };
 
@@ -184,8 +184,8 @@ export default function LeavePoliciesPage() {
       );
 
       await fetchPolicies();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to update policy status');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to update policy status'));
     } finally {
       setTogglingPolicy(null);
     }
@@ -198,8 +198,8 @@ export default function LeavePoliciesPage() {
       if (response.data.success) {
         toast.success(response.data.message);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to initialize leave balances');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to initialize leave balances'));
     } finally {
       setInitializingBalances(false);
     }

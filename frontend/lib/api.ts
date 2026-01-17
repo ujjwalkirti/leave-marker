@@ -90,6 +90,7 @@ export const employeeAPI = {
   createEmployee: (data: any) => api.post('/employees', data),
   updateEmployee: (id: number, data: any) => api.put(`/employees/${id}`, data),
   deactivateEmployee: (id: number) => api.delete(`/employees/${id}`),
+  reactivateEmployee: (id: number) => api.put(`/employees/${id}/reactivate`),
 };
 
 // Leave Policy APIs

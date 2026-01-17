@@ -17,4 +17,6 @@ public class PaymentInitiateResponse {
     private String transactionId;
     private String companyName;
     private String companyEmail;
+    private Long employeeCount;
+    private Long pricePerEmployee; // Price per employee in paise
 }
