@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
@@ -48,17 +49,17 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-2xl">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <div className="bg-indigo-600 text-white p-3 rounded-lg">
+            <div className="bg-primary text-white p-3 rounded-lg">
               <Building2 className="h-8 w-8" />
             </div>
           </div>
           <CardTitle className="text-2xl text-center">Create Your Account</CardTitle>
           <CardDescription className="text-center">
-            Set up your company's leave management system
+            Set up your company&apos;s leave management system
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -163,7 +164,7 @@ export default function SignupPage() {
           </form>
           <div className="mt-4 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
-            <Link href="/login" className="text-indigo-600 hover:underline font-medium">
+            <Link href="/login" className="text-primary hover:underline font-medium">
               Login
             </Link>
           </div>

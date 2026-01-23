@@ -27,4 +27,6 @@ public interface HolidayRepository extends JpaRepository<Holiday, Long> {
                                                        @Param("state") IndianState state,
                                                        @Param("startDate") LocalDate startDate,
                                                        @Param("endDate") LocalDate endDate);
+
+    long countByCompanyIdAndDeletedFalse(Long companyId);
 }

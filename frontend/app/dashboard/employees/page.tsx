@@ -32,7 +32,8 @@ import {
 } from '@/components/ui/select';
 import { employeeAPI } from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, UserX } from 'lucide-react';
+import { getErrorMessage } from '@/lib/utils';
+import { Loader2, Plus, Pencil, UserX, UserCheck } from 'lucide-react';
 
 const ROLES = ['EMPLOYEE', 'MANAGER', 'HR_ADMIN', 'SUPER_ADMIN'];
 
@@ -53,7 +54,7 @@ interface Employee {
   role: string;
   workLocation: string;
   dateOfJoining: string;
-  active: boolean;
+  status: 'ACTIVE' | 'INACTIVE';
 }
 
 export default function EmployeesPage() {
@@ -87,8 +88,8 @@ export default function EmployeesPage() {
       if (response.data.success) {
         setEmployees(response.data.data);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to fetch employees');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to fetch employees'));
     } finally {
       setLoading(false);
     }
@@ -109,8 +110,8 @@ export default function EmployeesPage() {
       setDialogOpen(false);
       resetForm();
       await fetchEmployees();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -141,8 +142,20 @@ export default function EmployeesPage() {
       await employeeAPI.deactivateEmployee(id);
       toast.success('Employee deactivated successfully!');
       await fetchEmployees();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to deactivate employee');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to deactivate employee'));
+    }
+  };
+
+  const handleReactivate = async (id: number) => {
+    if (!confirm('Are you sure you want to reactivate this employee?')) return;
+
+    try {
+      await employeeAPI.reactivateEmployee(id);
+      toast.success('Employee reactivated successfully!');
+      await fetchEmployees();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to reactivate employee'));
     }
   };
 
@@ -175,8 +188,8 @@ export default function EmployeesPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Employees</h1>
-            <p className="text-gray-500 mt-1">Manage your company employees</p>
+            <h1 className="text-3xl font-bold">Employees</h1>
+            <p className="text-muted-foreground mt-1">Manage your company employees</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
@@ -349,10 +362,10 @@ export default function EmployeesPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : employees.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No employees found. Add your first employee to get started.
               </p>
             ) : (
@@ -391,9 +404,9 @@ export default function EmployeesPage() {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            variant={employee.active ? 'default' : 'secondary'}
+                            variant={employee.status === 'ACTIVE' ? 'default' : 'secondary'}
                           >
-                            {employee.active ? 'Active' : 'Inactive'}
+                            {employee.status === 'ACTIVE' ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -405,13 +418,21 @@ export default function EmployeesPage() {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            {employee.active && (
+                            {employee.status === 'ACTIVE' ? (
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => handleDeactivate(employee.id)}
                               >
                                 <UserX className="h-4 w-4" />
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleReactivate(employee.id)}
+                              >
+                                <UserCheck className="h-4 w-4" />
                               </Button>
                             )}
                           </div>

@@ -5,6 +5,7 @@ import com.leavemarker.dto.leavepolicy.LeavePolicyRequest;
 import com.leavemarker.dto.leavepolicy.LeavePolicyResponse;
 import com.leavemarker.security.UserPrincipal;
 import com.leavemarker.service.LeavePolicyService;
+import com.leavemarker.service.PlanValidationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +22,18 @@ import java.util.List;
 public class LeavePolicyController {
 
     private final LeavePolicyService leavePolicyService;
+    private final PlanValidationService planValidationService;
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'HR_ADMIN')")
     public ResponseEntity<ApiResponse<LeavePolicyResponse>> createLeavePolicy(
             @Valid @RequestBody LeavePolicyRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate leave policy limit if policy is active
+        if (request.getActive() != null && request.getActive()) {
+            planValidationService.validateLeavePolicyLimit(currentUser.getCompanyId());
+        }
+
         LeavePolicyResponse response = leavePolicyService.createLeavePolicy(request, currentUser);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -63,6 +70,16 @@ public class LeavePolicyController {
             @PathVariable Long id,
             @Valid @RequestBody LeavePolicyRequest request,
             @AuthenticationPrincipal UserPrincipal currentUser) {
+        // Validate leave policy limit if activating a policy
+        if (request.getActive() != null && request.getActive()) {
+            // Get the current policy to check if it's already active
+            LeavePolicyResponse currentPolicy = leavePolicyService.getLeavePolicy(id, currentUser);
+            if (!currentPolicy.getActive()) {
+                // Only validate if we're actually activating an inactive policy
+                planValidationService.validateLeavePolicyLimit(currentUser.getCompanyId());
+            }
+        }
+
         LeavePolicyResponse response = leavePolicyService.updateLeavePolicy(id, request, currentUser);
         return ResponseEntity.ok(ApiResponse.success("Leave policy updated successfully", response));
     }

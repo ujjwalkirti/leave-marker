@@ -20,6 +20,9 @@ public class EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.contact-email}")
+    private String contactEmail;
+
     @Async
     public void sendPasswordResetEmail(String toEmail, String resetToken) {
         try {
@@ -149,5 +152,44 @@ public class EmailService {
             "Leave Management System",
             employeeName, date, reason
         );
+    }
+
+    /**
+     * Send contact/demo request email to the configured contact email address.
+     * This is a synchronous method as it's used for public contact form submissions
+     * and we need to confirm delivery to the user.
+     */
+    public void sendContactEmail(String senderName, String senderEmail, String phone, String message) {
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+            mailMessage.setFrom(fromEmail);
+            mailMessage.setTo(contactEmail);
+            mailMessage.setReplyTo(senderEmail);
+            mailMessage.setSubject("Demo Request from " + senderName + " - LeaveMarker");
+            mailMessage.setText(buildContactEmailBody(senderName, senderEmail, phone, message));
+
+            mailSender.send(mailMessage);
+            logger.info("Contact email sent from: {} to: {}", senderEmail, contactEmail);
+        } catch (Exception e) {
+            logger.error("Failed to send contact email from: {}", senderEmail, e);
+            throw new RuntimeException("Failed to send email. Please try again later.");
+        }
+    }
+
+    private String buildContactEmailBody(String name, String email, String phone, String message) {
+        StringBuilder body = new StringBuilder();
+        body.append("New Demo Request from LeaveMarker Website\n");
+        body.append("==========================================\n\n");
+        body.append("Name: ").append(name).append("\n");
+        body.append("Email: ").append(email).append("\n");
+        if (phone != null && !phone.isBlank()) {
+            body.append("Phone: ").append(phone).append("\n");
+        }
+        body.append("\nMessage:\n");
+        body.append("--------\n");
+        body.append(message).append("\n");
+        body.append("\n==========================================\n");
+        body.append("This email was sent via the LeaveMarker contact form.");
+        return body.toString();
     }
 }

@@ -12,7 +12,6 @@ import com.leavemarker.repository.CompanyRepository;
 import com.leavemarker.repository.EmployeeRepository;
 import com.leavemarker.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,22 +26,18 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final CompanyRepository companyRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.max-employees-per-company}")
-    private int maxEmployeesPerCompany;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     @Transactional
     public EmployeeResponse createEmployee(EmployeeRequest request, UserPrincipal currentUser) {
         Company company = companyRepository.findById(currentUser.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-        long employeeCount = employeeRepository.countByCompanyId(company.getId());
-        if (employeeCount >= maxEmployeesPerCompany) {
-            throw new BadRequestException("Maximum employee limit reached for this company");
-        }
+        // Check subscription plan limits
+        subscriptionFeatureService.validateCanAddEmployee(company.getId());
 
-        if (employeeRepository.existsByCompanyIdAndEmailAndDeletedFalse(company.getId(), request.getEmail())) {
-            throw new BadRequestException("Employee with this email already exists");
+        if (employeeRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
+            throw new BadRequestException("An account with this email already exists");
         }
 
         if (employeeRepository.existsByCompanyIdAndEmployeeIdAndDeletedFalse(company.getId(), request.getEmployeeId())) {
@@ -114,9 +109,8 @@ public class EmployeeService {
             employee.setFullName(request.getFullName());
         }
         if (request.getEmail() != null && !request.getEmail().equals(employee.getEmail())) {
-            if (employeeRepository.existsByCompanyIdAndEmailAndDeletedFalse(
-                    currentUser.getCompanyId(), request.getEmail())) {
-                throw new BadRequestException("Employee with this email already exists");
+            if (employeeRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
+                throw new BadRequestException("An account with this email already exists");
             }
             employee.setEmail(request.getEmail());
         }
@@ -160,7 +154,20 @@ public class EmployeeService {
             throw new BadRequestException("Access denied");
         }
 
-        employee.setDeleted(true);
+        employee.setStatus(EmployeeStatus.INACTIVE);
+        employeeRepository.save(employee);
+    }
+
+    @Transactional
+    public void reactivateEmployee(Long id, UserPrincipal currentUser) {
+        Employee employee = employeeRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        if (!employee.getCompany().getId().equals(currentUser.getCompanyId())) {
+            throw new BadRequestException("Access denied");
+        }
+
+        employee.setStatus(EmployeeStatus.ACTIVE);
         employeeRepository.save(employee);
     }
 

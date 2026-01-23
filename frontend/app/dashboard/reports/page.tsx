@@ -1,23 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/dashboard-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { reportsAPI } from '@/lib/api';
+import { useSubscription } from '@/lib/subscription-context';
 import { toast } from 'sonner';
-import { Loader2, Download, FileSpreadsheet, FileText, Calendar, Clock, BarChart3 } from 'lucide-react';
+import { Loader2, Download, FileSpreadsheet, FileText, Calendar, Clock, BarChart3, Lock, Sparkles } from 'lucide-react';
 
 export default function ReportsPage() {
+  const router = useRouter();
+  const { features, loading: featuresLoading } = useSubscription();
   const [loading, setLoading] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
     endDate: new Date().toISOString().split('T')[0],
   });
 
+  const hasReportsAccess = features?.advancedReports ?? false;
+
   const downloadReport = async (reportType: string, format: 'excel' | 'csv') => {
+    if (!hasReportsAccess) {
+      toast.error('Reports are available on Pro and Enterprise plans. Please upgrade to access.');
+      return;
+    }
+
     const loadingKey = `${reportType}-${format}`;
     setLoading(loadingKey);
 
@@ -72,12 +84,117 @@ export default function ReportsPage() {
     return loading === `${reportType}-${format}`;
   };
 
+  // Show upgrade prompt for free users
+  if (!featuresLoading && !hasReportsAccess) {
+    return (
+      <DashboardLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+            <p className="text-muted-foreground mt-1">Download various reports in Excel or CSV format</p>
+          </div>
+
+          <Card className="border-orange-200 bg-orange-50/50">
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center justify-center text-center py-8">
+                <div className="bg-orange-100/70 p-4 rounded-full mb-4">
+                  <Lock className="h-8 w-8 text-amber-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Unlock Advanced Reports
+                </h2>
+                <p className="text-muted-foreground max-w-md mb-6">
+                  Advanced reports are available on Pro and Enterprise plans. Upgrade now to download
+                  comprehensive leave balance, attendance, and usage reports.
+                </p>
+                <div className="flex gap-4">
+                  <Button
+                    onClick={() => router.push('/pricing')}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    Upgrade Now
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => router.push('/dashboard')}
+                  >
+                    Back to Dashboard
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Preview of reports (disabled) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 opacity-50 pointer-events-none">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="bg-primary/10 p-3 rounded-lg">
+                    <BarChart3 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle>Leave Balance Report</CardTitle>
+                    <CardDescription>
+                      Employee leave balances for current year
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Button disabled className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Excel
+                  </Button>
+                  <Button disabled variant="outline" className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="bg-green-100 p-3 rounded-lg">
+                    <Clock className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle>Attendance Report</CardTitle>
+                    <CardDescription>
+                      Employee attendance for selected period
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3">
+                  <Button disabled className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    Excel
+                  </Button>
+                  <Button disabled variant="outline" className="flex-1">
+                    <Lock className="mr-2 h-4 w-4" />
+                    CSV
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500 mt-1">Download various reports in Excel or CSV format</p>
+          <h1 className="text-3xl font-bold text-foreground">Reports</h1>
+          <p className="text-muted-foreground mt-1">Download various reports in Excel or CSV format</p>
         </div>
 
         {/* Date Range Filter */}
@@ -122,8 +239,8 @@ export default function ReportsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-indigo-100 p-3 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-indigo-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle>Leave Balance Report</CardTitle>
@@ -135,7 +252,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download a comprehensive report showing leave balances for all employees,
                   including available, used, and carried forward leaves.
                 </p>
@@ -197,7 +314,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download attendance records for all employees within the selected date range,
                   including punch in/out times and work hours.
                 </p>
@@ -246,8 +363,8 @@ export default function ReportsPage() {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-purple-100 p-3 rounded-lg">
-                  <Calendar className="h-6 w-6 text-purple-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <Calendar className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <CardTitle>Leave Usage Report</CardTitle>
@@ -259,7 +376,7 @@ export default function ReportsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Download detailed leave usage statistics, including approved leaves by type,
                   employee, and department for the selected period.
                 </p>
@@ -305,37 +422,37 @@ export default function ReportsPage() {
           </Card>
 
           {/* Info Card */}
-          <Card className="bg-blue-50 border-blue-200">
+          <Card className="bg-primary/5 border-blue-200">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="bg-blue-100 p-3 rounded-lg">
-                  <Download className="h-6 w-6 text-blue-600" />
+                <div className="bg-primary/10 p-3 rounded-lg">
+                  <Download className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <CardTitle className="text-blue-900">Report Information</CardTitle>
-                  <CardDescription className="text-blue-700">
+                  <CardTitle className="text-foreground">Report Information</CardTitle>
+                  <CardDescription className="text-primary">
                     Tips for using reports
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 text-sm text-blue-900">
+            <CardContent className="space-y-3 text-sm text-foreground">
               <div className="flex items-start gap-2">
-                <FileSpreadsheet className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <FileSpreadsheet className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   <strong>Excel files (.xlsx)</strong> include formatting and are best for
                   viewing and analysis in spreadsheet applications.
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <FileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <FileText className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   <strong>CSV files (.csv)</strong> are plain text and can be imported into
                   any system or database.
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <Calendar className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <Calendar className="h-4 w-4 mt-0.5 shrink-0" />
                 <p>
                   Use the date range filter above to customize attendance and leave usage
                   reports for specific time periods.

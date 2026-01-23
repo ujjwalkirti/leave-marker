@@ -120,7 +120,21 @@ public class LeaveBalanceService {
     }
 
     public List<LeaveBalance> getEmployeeBalances(Long employeeId, Integer year) {
-        return leaveBalanceRepository.findByEmployeeIdAndYearAndDeletedFalse(employeeId, year);
+        Employee employee = employeeRepository.findByIdAndDeletedFalse(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+
+        // Get all leave balances for the employee
+        List<LeaveBalance> allBalances = leaveBalanceRepository.findByEmployeeIdAndYearAndDeletedFalse(employeeId, year);
+
+        // Get active leave policies for the company
+        List<LeavePolicy> activePolicies = leavePolicyRepository
+                .findByCompanyIdAndActiveAndDeletedFalse(employee.getCompany().getId(), true);
+
+        // Filter balances to only include those with active policies
+        return allBalances.stream()
+                .filter(balance -> activePolicies.stream()
+                        .anyMatch(policy -> policy.getLeaveType() == balance.getLeaveType()))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional

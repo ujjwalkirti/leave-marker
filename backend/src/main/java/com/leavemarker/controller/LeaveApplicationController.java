@@ -50,6 +50,15 @@ public class LeaveApplicationController {
         return ResponseEntity.ok(ApiResponse.success("Leave applications retrieved successfully", response));
     }
 
+    @GetMapping("/my-leaves/pending/count")
+    public ResponseEntity<ApiResponse<Long>> getPendingApplicationsCount(
+            @AuthenticationPrincipal UserPrincipal currentUser) {
+        long count = leaveApplicationService.getMyLeaveApplications(currentUser).stream()
+                .filter(app -> "PENDING".equals(app.getStatus()))
+                .count();
+        return ResponseEntity.ok(ApiResponse.success("Pending applications count retrieved successfully", count));
+    }
+
     @GetMapping("/pending-approvals/manager")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ApiResponse<List<LeaveApplicationResponse>>> getPendingApprovalsForManager(

@@ -1365,6 +1365,325 @@
 			]
 		},
 		{
+			"name": "Plans & Subscriptions",
+			"item": [
+				{
+					"name": "Seed FREE Plan",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"free_plan_id\", jsonData.data.id);",
+									"    console.log(\"FREE Plan created with ID:\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Free Plan\",\n  \"description\": \"Perfect for small teams just getting started\",\n  \"tier\": \"FREE\",\n  \"planType\": \"FREE\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 0,\n  \"yearlyPrice\": 0,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 10,\n  \"maxLeavePolicies\": 1,\n  \"maxHolidays\": 6,\n  \"active\": true,\n  \"attendanceManagement\": false,\n  \"reportsDownload\": false,\n  \"multipleLeavePolicies\": false,\n  \"unlimitedHolidays\": false,\n  \"attendanceRateAnalytics\": false,\n  \"advancedReports\": false,\n  \"customLeaveTypes\": false,\n  \"apiAccess\": false,\n  \"prioritySupport\": false,\n  \"pricePerEmployee\": 0,\n  \"reportDownloadPriceUnder50\": 0,\n  \"reportDownloadPrice50Plus\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/plans",
+							"host": ["{{base_url}}"],
+							"path": ["plans"]
+						},
+						"description": "Create FREE plan for seeding"
+					},
+					"response": []
+				},
+				{
+					"name": "Seed MID_TIER Plan (Monthly)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"mid_tier_monthly_plan_id\", jsonData.data.id);",
+									"    console.log(\"MID_TIER Monthly Plan created with ID:\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mid-Tier Plan\",\n  \"description\": \"Comprehensive HR management for growing companies\",\n  \"tier\": \"MID_TIER\",\n  \"planType\": \"PAID\",\n  \"billingCycle\": \"MONTHLY\",\n  \"monthlyPrice\": 100,\n  \"yearlyPrice\": 1000,\n  \"minEmployees\": 1,\n  \"maxEmployees\": 999999,\n  \"maxLeavePolicies\": -1,\n  \"maxHolidays\": -1,\n  \"active\": true,\n  \"attendanceManagement\": true,\n  \"reportsDownload\": true,\n  \"multipleLeavePolicies\": true,\n  \"unlimitedHolidays\": true,\n  \"attendanceRateAnalytics\": true,\n  \"advancedReports\": true,\n  \"customLeaveTypes\": true,\n  \"apiAccess\": true,\n  \"prioritySupport\": true,\n  \"pricePerEmployee\": 100,\n  \"reportDownloadPriceUnder50\": 200,\n  \"reportDownloadPrice50Plus\": 400\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/plans",
+							"host": ["{{base_url}}"],
+							"path": ["plans"]
+						},
+						"description": "Create MID_TIER plan for seeding"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Plans",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/plans",
+							"host": ["{{base_url}}"],
+							"path": ["plans"]
+						},
+						"description": "Get all plans"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Plans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/plans/active",
+							"host": ["{{base_url}}"],
+							"path": ["plans", "active"]
+						},
+						"description": "Get active plans (public endpoint)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Plans by Tier",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/plans/tier/FREE",
+							"host": ["{{base_url}}"],
+							"path": ["plans", "tier", "FREE"]
+						},
+						"description": "Get plans by tier (FREE or MID_TIER)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Plan by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/plans/{{free_plan_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["plans", "{{free_plan_id}}"]
+						},
+						"description": "Get plan by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Plan",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Free Plan Updated\",\n  \"description\": \"Perfect for small teams just getting started - Updated\",\n  \"active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/plans/{{free_plan_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["plans", "{{free_plan_id}}"]
+						},
+						"description": "Update plan"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Plan",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/plans/{{free_plan_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["plans", "{{free_plan_id}}"]
+						},
+						"description": "Delete (soft delete) plan"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Subscription",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.environment.set(\"subscription_id\", jsonData.data.id);",
+									"    console.log(\"Subscription created with ID:\", jsonData.data.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"planId\": {{free_plan_id}},\n  \"billingCycle\": \"MONTHLY\",\n  \"autoRenew\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/subscriptions",
+							"host": ["{{base_url}}"],
+							"path": ["subscriptions"]
+						},
+						"description": "Create subscription for current company"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current Subscription",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/current",
+							"host": ["{{base_url}}"],
+							"path": ["subscriptions", "current"]
+						},
+						"description": "Get current active subscription"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Subscription Features",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/features",
+							"host": ["{{base_url}}"],
+							"path": ["subscriptions", "features"]
+						},
+						"description": "Get subscription features and limits"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Subscriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions",
+							"host": ["{{base_url}}"],
+							"path": ["subscriptions"]
+						},
+						"description": "Get all subscriptions for company"
+					},
+					"response": []
+				},
+				{
+					"name": "Cancel Subscription",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/subscriptions/{{subscription_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["subscriptions", "{{subscription_id}}", "cancel"]
+						},
+						"description": "Cancel subscription"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Health Check",
 			"item": [
 				{

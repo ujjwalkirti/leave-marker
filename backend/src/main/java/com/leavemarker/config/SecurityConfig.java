@@ -62,6 +62,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/signup", "/auth/login", "/auth/password-reset-request", "/auth/password-reset-confirm").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers("/plans/active").permitAll()
+                        .requestMatchers("/payments/webhook").permitAll()
+                        .requestMatchers("/contact").permitAll()
                         .anyRequest().authenticated()
                 );
 

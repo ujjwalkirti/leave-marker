@@ -30,9 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { leavePolicyAPI } from '@/lib/api';
+import { leavePolicyAPI, leaveBalanceAPI } from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/utils';
+import { Loader2, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/lib/auth-context';
 
 const LEAVE_TYPES = [
   'CASUAL_LEAVE',
@@ -57,11 +60,14 @@ interface LeavePolicy {
 }
 
 export default function LeavePoliciesPage() {
+  const { user } = useAuth();
   const [policies, setPolicies] = useState<LeavePolicy[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<LeavePolicy | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [initializingBalances, setInitializingBalances] = useState(false);
+  const [togglingPolicy, setTogglingPolicy] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     leaveType: 'CASUAL_LEAVE',
     annualQuota: 12,
@@ -84,8 +90,8 @@ export default function LeavePoliciesPage() {
       if (response.data.success) {
         setPolicies(response.data.data);
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to fetch policies');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to fetch policies'));
     } finally {
       setLoading(false);
     }
@@ -106,8 +112,8 @@ export default function LeavePoliciesPage() {
       setDialogOpen(false);
       resetForm();
       await fetchPolicies();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+    } catch (error) {
+      toast.error(getErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -135,8 +141,8 @@ export default function LeavePoliciesPage() {
       await leavePolicyAPI.deletePolicy(id);
       toast.success('Leave policy deleted successfully!');
       await fetchPolicies();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to delete policy');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to delete policy'));
     }
   };
 
@@ -161,22 +167,81 @@ export default function LeavePoliciesPage() {
     }
   };
 
+  const handleToggleActive = async (policy: LeavePolicy) => {
+    try {
+      setTogglingPolicy(policy.id);
+      const newActiveState = !policy.active;
+
+      await leavePolicyAPI.updatePolicy(policy.id, {
+        ...policy,
+        active: newActiveState,
+      });
+
+      toast.success(
+        newActiveState
+          ? 'Leave policy activated successfully!'
+          : 'Leave policy deactivated successfully!'
+      );
+
+      await fetchPolicies();
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to update policy status'));
+    } finally {
+      setTogglingPolicy(null);
+    }
+  };
+
+  const handleInitializeBalances = async () => {
+    try {
+      setInitializingBalances(true);
+      const response = await leaveBalanceAPI.initializeLeaveBalances();
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to initialize leave balances'));
+    } finally {
+      setInitializingBalances(false);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Leave Policies</h1>
-            <p className="text-gray-500 mt-1">Manage company leave policies</p>
+            <h1 className="text-3xl font-bold text-foreground">Leave Policies</h1>
+            <p className="text-muted-foreground mt-1">Manage company leave policies</p>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Policy
+          <div className="flex gap-3">
+            {(user?.role === 'SUPER_ADMIN' || user?.role === 'HR_ADMIN') && (
+              <Button
+                onClick={handleInitializeBalances}
+                disabled={initializingBalances}
+                variant="outline"
+                className="border-primary text-primary hover:bg-primary/5"
+              >
+                {initializingBalances ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Initializing...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Initialize Balances
+                  </>
+                )}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
+            )}
+            <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Policy
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
               <DialogHeader>
                 <DialogTitle>
                   {editingPolicy ? 'Edit Leave Policy' : 'Add New Leave Policy'}
@@ -335,8 +400,9 @@ export default function LeavePoliciesPage() {
                   </Button>
                 </div>
               </form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Card>
@@ -346,10 +412,10 @@ export default function LeavePoliciesPage() {
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : policies.length === 0 ? (
-              <p className="text-center text-gray-500 py-8">
+              <p className="text-center text-muted-foreground py-8">
                 No leave policies found. Add your first policy to get started.
               </p>
             ) : (
@@ -362,7 +428,7 @@ export default function LeavePoliciesPage() {
                       <TableHead>Monthly Accrual</TableHead>
                       <TableHead>Carry Forward</TableHead>
                       <TableHead>Max Carry Forward</TableHead>
-                      <TableHead>Status</TableHead>
+                      <TableHead>Active</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -393,9 +459,16 @@ export default function LeavePoliciesPage() {
                             : '-'}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={policy.active ? 'default' : 'secondary'}>
-                            {policy.active ? 'Active' : 'Inactive'}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={policy.active}
+                              onCheckedChange={() => handleToggleActive(policy)}
+                              disabled={togglingPolicy === policy.id}
+                            />
+                            <span className="text-sm text-muted-foreground">
+                              {policy.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">

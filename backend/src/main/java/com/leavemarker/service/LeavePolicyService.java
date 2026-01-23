@@ -1,5 +1,11 @@
 package com.leavemarker.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.leavemarker.dto.leavepolicy.LeavePolicyRequest;
 import com.leavemarker.dto.leavepolicy.LeavePolicyResponse;
 import com.leavemarker.entity.Company;
@@ -9,12 +15,8 @@ import com.leavemarker.exception.ResourceNotFoundException;
 import com.leavemarker.repository.CompanyRepository;
 import com.leavemarker.repository.LeavePolicyRepository;
 import com.leavemarker.security.UserPrincipal;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +24,15 @@ public class LeavePolicyService {
 
     private final LeavePolicyRepository leavePolicyRepository;
     private final CompanyRepository companyRepository;
+    private final SubscriptionFeatureService subscriptionFeatureService;
 
     @Transactional
     public LeavePolicyResponse createLeavePolicy(LeavePolicyRequest request, UserPrincipal currentUser) {
         Company company = companyRepository.findById(currentUser.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
+
+        // Check subscription plan limits
+        subscriptionFeatureService.validateCanAddLeavePolicy(company.getId());
 
         if (leavePolicyRepository.existsByCompanyIdAndLeaveTypeAndDeletedFalse(
                 company.getId(), request.getLeaveType())) {
@@ -37,13 +43,15 @@ public class LeavePolicyService {
             throw new BadRequestException("Max carry forward must be specified when carry forward is enabled");
         }
 
+        Integer maxCarryForward = request.getMaxCarryForward();
+
         LeavePolicy policy = LeavePolicy.builder()
                 .company(company)
                 .leaveType(request.getLeaveType())
                 .annualQuota(request.getAnnualQuota())
                 .monthlyAccrual(request.getMonthlyAccrual())
                 .carryForward(request.getCarryForward())
-                .maxCarryForward(request.getMaxCarryForward() != null ? request.getMaxCarryForward() : 0)
+                .maxCarryForward(maxCarryForward != null ? maxCarryForward : 0)
                 .encashmentAllowed(request.getEncashmentAllowed())
                 .halfDayAllowed(request.getHalfDayAllowed())
                 .active(request.getActive())
@@ -65,7 +73,7 @@ public class LeavePolicyService {
     }
 
     public List<LeavePolicyResponse> getAllLeavePolicies(UserPrincipal currentUser) {
-        List<LeavePolicy> policies = leavePolicyRepository.findByCompanyIdAndDeletedFalse(
+        List<LeavePolicy> policies = leavePolicyRepository.findByCompanyId(
                 currentUser.getCompanyId());
         return policies.stream()
                 .map(this::mapToResponse)
@@ -104,7 +112,8 @@ public class LeavePolicyService {
         policy.setAnnualQuota(request.getAnnualQuota());
         policy.setMonthlyAccrual(request.getMonthlyAccrual());
         policy.setCarryForward(request.getCarryForward());
-        policy.setMaxCarryForward(request.getMaxCarryForward() != null ? request.getMaxCarryForward() : 0);
+        Integer maxCarryForward = request.getMaxCarryForward();
+        policy.setMaxCarryForward(maxCarryForward != null ? maxCarryForward : 0);
         policy.setEncashmentAllowed(request.getEncashmentAllowed());
         policy.setHalfDayAllowed(request.getHalfDayAllowed());
         policy.setActive(request.getActive());
