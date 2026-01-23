@@ -104,6 +104,12 @@ public class SubscriptionFeatureService {
     @Transactional(readOnly = true)
     public void validateCanAddLeavePolicy(Long companyId) {
         SubscriptionInfo info = getSubscriptionInfo(companyId);
+
+        // If plan allows multiple/unlimited leave policies, skip validation
+        if (info.isMultipleLeavePolicies()) {
+            return;
+        }
+
         long currentPolicyCount = leavePolicyRepository.countByCompanyIdAndDeletedFalse(companyId);
 
         if (currentPolicyCount >= info.getMaxLeavePolicies()) {
